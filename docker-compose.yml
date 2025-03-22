@@ -1,0 +1,14 @@
+services:
+  node-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - .:/app
+      - ./meshcentral-data:/app/meshcentral-data
+    environment:
+      NODE_ENV: production 
+      HOSTNAME: tee.up.railway.app 

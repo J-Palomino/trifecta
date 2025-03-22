@@ -1,0 +1,20 @@
+{"_id":"DatabaseIdentifier","value":"528ab33bd209902377a1779a2df4dcc800c9475901f867e4444a1dccc8584a8d8652cfa7cabc445e674d23b0ea8be0a7"}
+{"_id":"InvitationLinkEncryptionKey","key":"9068f2279413f44b0e14bcd5af5e32e44f40c1eb8ce594ebda1352dbea820edb1c145ae573dd67dfaa38f14fb957a08693fd8ac154390441e4343d3ce7f7038244b6904e94639963892ed62a3e2b2494","time":1742625581478}
+{"_id":"LoginCookieEncryptionKey","key":"d3ca69fd7e0cfad99f9968684e8578f37cb126cabb0370e9cef9275acc10a22570d849eb5817b227d24ff8201ff4e299d643e0daa6532947762d6d139551c35dab24aecc94c7de874a6c101068797506","time":1742625581478}
+{"_id":"SchemaVersion","value":2}
+{"_id":"dbconfig","version":1,"amtWsEventSecret":"cafac6369a716d9b5eff1e992c00f40e0b1c627dfb878542d6e272a393f0b1cf"}
+{"type":"mesh","_id":"mesh//f5GiKn@FF8jsii210sxGMD@YLNj5vTHNQPA@dsFlo77@C30lKFfk$N2K@1QWkXQW","name":"swarm","mtype":2,"desc":"hello world","domain":"","links":{"user//juan":{"name":"juan","rights":4294967295}},"creation":1742625679128,"creatorid":"user//juan","creatorname":"juan"}
+{"type":"mesh","_id":"mesh//f8uh9mSzri7adGdnV7P3xlvdxkqClQtWa$$kTSVqjDpX65IA1WjmXVz5JEqn71Qm","name":"ateam","mtype":2,"desc":"aa","domain":"","links":{"user//juan":{"name":"juan","rights":4294967295}},"creation":1742627080621,"creatorid":"user//juan","creatorname":"juan"}
+{"type":"user","_id":"user//juan","name":"juan","email":"jpalomino09@gmail.com","creation":1742625646,"login":1742628969,"access":1742628969,"domain":"","siteadmin":4294967295,"salt":"MZ0xoMPVcn2y+SE18olGPYG4fRP6y5MHca2jSEVF/qzjRYc3YqHp4InIW72lUeVGv7D0Wacdi+PDZq6alNhzd/bhpTpzUlFxQae5biCEpdgi7kCz5X6OB3GsTORCfas09W9ctFBxU+Qu6YN3mUT5si+uc4z7y9gnYCJN57nNUbI=","hash":"a038LWTjTDbhkutzbeV7k6ysfq77pfkKhjQDp9IaH+NV073sWizXK9OXXQVska5JQquUjLct5GpMQt4+AhP/lMoBQd6OS1yc8YtPbngGDZeEy2VX3RFwxIE/W10L06x6YYESkfvWav9OLgjpH7D+duGkiWo2LwfAlwD4mYd8Coo=","links":{"mesh//f5GiKn@FF8jsii210sxGMD@YLNj5vTHNQPA@dsFlo77@C30lKFfk%24N2K@1QWkXQW":{"rights":4294967295},"mesh//f8uh9mSzri7adGdnV7P3xlvdxkqClQtWa%24%24kTSVqjDpX65IA1WjmXVz5JEqn71Qm":{"rights":4294967295}},"pastlogin":1742628133}
+{"_id":"wsuser//juan","state":"{\"sort\":\"0\"}"}
+{"$$indexCreated":{"fieldName":"type","unique":false,"sparse":false}}
+{"$$indexCreated":{"fieldName":"domain","unique":false,"sparse":false}}
+{"$$indexCreated":{"fieldName":"meshid","unique":false,"sparse":true}}
+{"$$indexCreated":{"fieldName":"nodeid","unique":false,"sparse":true}}
+{"$$indexCreated":{"fieldName":"email","unique":false,"sparse":true}}
+{"$$indexCreated":{"fieldName":"type"}}
+{"$$indexCreated":{"fieldName":"domain"}}
+{"$$indexCreated":{"fieldName":"meshid","sparse":true}}
+{"$$indexCreated":{"fieldName":"nodeid","sparse":true}}
+{"$$indexCreated":{"fieldName":"email","sparse":true}}
+{"_id":"SchemaVersion","value":2}
