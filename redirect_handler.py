@@ -1,123 +1,87 @@
-import aiohttp
-from aiohttp import web
-import re
 import asyncio
-import logging
 import os
+from urllib.parse import urlparse, urlunparse
+from aiohttp import web
+import logging
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+)
 logger = logging.getLogger(__name__)
 
-# Regular expression to match URLs with :443 in them
-PORT_RE = re.compile(r':443(/.*)?$')
+# Configuration
+HTTPS_PORT = 8443
+HTTPS_HOST = None  # Will be auto-detected from request
 
-async def handle_request(request):
-    """Handle incoming requests and fix redirect loops"""
-    # Log the request
-    logger.info(f"Received request: {request.method} {request.path}")
-    logger.info(f"Headers: {request.headers}")
+async def handle_redirect(request):
+    """
+    Redirect all HTTP requests to HTTPS on port 8443
+    """
+    # Get the original host from the request
+    original_host = request.headers.get('Host', '')
     
-    # Check for Railway-specific headers
-    railway_headers = {k: v for k, v in request.headers.items() if k.lower().startswith('x-railway')}
-    if railway_headers:
-        logger.info(f"Railway headers: {railway_headers}")
+    # Extract the hostname (without port)
+    hostname = original_host.split(':')[0] if ':' in original_host else original_host
     
-    # Check if we need to fix a URL with :443 in it
-    if PORT_RE.search(request.path) or ":443" in request.url.path:
-        # Remove :443 from the path
-        fixed_path = PORT_RE.sub(r'\1', request.path)
-        logger.info(f"Redirecting from {request.path} to {fixed_path}")
-        # Use absolute URL without port to avoid further redirects
-        hostname = os.environ.get('HOSTNAME', 'tee.up.railway.app')
-        return web.HTTPFound(f"https://{hostname}{fixed_path}")
+    # Build the target HTTPS URL
+    target_url = urlunparse((
+        'https',                          # scheme
+        f"{hostname}:{HTTPS_PORT}",       # netloc with port 8443
+        request.path,                     # path
+        '',                               # params
+        request.query_string,             # query
+        ''                                # fragment
+    ))
     
-    # Forward the request to the real server
-    target_url = f"http://localhost:8443{request.path}"
+    logger.info(f"Redirecting: {request.url} → {target_url}")
     
-    async with aiohttp.ClientSession() as session:
-        try:
-            # Forward the request with the same method and headers
-            method = request.method
-            headers = {k: v for k, v in request.headers.items() 
-                      if k.lower() not in ('host', 'content-length')}
-            # Add X-Forwarded headers to help MeshCentral understand the request
-            headers['X-Forwarded-Proto'] = 'https'
-            headers['X-Forwarded-Host'] = os.environ.get('HOSTNAME', 'tee.up.railway.app')
-            headers['X-Forwarded-For'] = request.headers.get('X-Forwarded-For', request.remote)
-            
-            # Get the body if it exists
-            body = await request.read() if request.body_exists else None
-            
-            # Log the forwarded request
-            logger.info(f"Forwarding {method} request to {target_url}")
-            logger.info(f"With headers: {headers}")
-            
-            async with session.request(
-                method, 
-                target_url, 
-                headers=headers, 
-                data=body, 
-                allow_redirects=False
-            ) as resp:
-                # Check if the response is a redirect
-                if 300 <= resp.status < 400 and 'Location' in resp.headers:
-                    location = resp.headers['Location']
-                    logger.info(f"Received redirect to {location}")
-                    
-                    # Check if the redirect contains :443
-                    if ':443' in location:
-                        fixed_location = location.replace(':443', '')
-                        logger.info(f"Fixed redirect location: {fixed_location}")
-                        return web.HTTPFound(fixed_location)
-                
-                # Create a response with the same status and headers
-                response = web.StreamResponse(status=resp.status)
-                
-                # Copy headers, excluding some that will be set by aiohttp
-                for key, value in resp.headers.items():
-                    if key.lower() not in ('content-length', 'transfer-encoding', 'content-encoding', 'connection'):
-                        if key.lower() == 'location' and ':443' in value:
-                            # Fix location headers to avoid redirect loops
-                            response.headers[key] = value.replace(':443', '')
-                        else:
-                            response.headers[key] = value
-                
-                # Start the response
-                await response.prepare(request)
-                
-                # Stream the body
-                async for data in resp.content.iter_any():
-                    await response.write(data)
-                
-                await response.write_eof()
-                return response
-                
-        except Exception as e:
-            logger.error(f"Error forwarding request: {e}")
-            return web.HTTPInternalServerError(text=str(e))
+    # Perform a 302 redirect
+    return web.HTTPFound(target_url)
+
+async def on_shutdown(app):
+    """Handler for application shutdown"""
+    logger.info("HTTP redirect server shutting down")
 
 async def start_server():
-    """Start the redirect handler server"""
+    """Start the HTTP to HTTPS redirect server"""
+    # Create the application
     app = web.Application()
-    app.router.add_route('*', '/{path:.*}', handle_request)
     
-    # Setup the server
+    # Register the on_shutdown handler BEFORE anything else
+    app.on_shutdown.append(on_shutdown)
+    
+    # Set up routes - catch all paths
+    app.router.add_get('/', handle_redirect)
+    app.router.add_get('/{path:.*}', handle_redirect)
+    
+    # Start the server
     runner = web.AppRunner(app)
     await runner.setup()
     
-    # Listen on port 443 for HTTPS and 80 for HTTP
-    https_site = web.TCPSite(runner, '0.0.0.0', 443)
-    http_site = web.TCPSite(runner, '0.0.0.0', 80)
+    # Listen on all interfaces on port 80
+    site = web.TCPSite(runner, '0.0.0.0', 80)
+    await site.start()
     
-    await https_site.start()
-    await http_site.start()
-    
-    logger.info("Redirect handler running on ports 80 and 443")
+    logger.info(f"HTTP redirect server started on port 80, redirecting to port {HTTPS_PORT}")
+    logger.info(f"Process ID: {os.getpid()}")
     
     # Keep the server running
-    while True:
-        await asyncio.sleep(3600)
+    try:
+        while True:
+            await asyncio.sleep(3600)  # Sleep for an hour
+    except asyncio.CancelledError:
+        logger.info("Server shutdown requested")
+    finally:
+        await runner.cleanup()
+
+def main():
+    """Main entry point"""
+    try:
+        asyncio.run(start_server())
+    except KeyboardInterrupt:
+        logger.info("HTTP redirect server stopped by user")
 
 if __name__ == "__main__":
-    asyncio.run(start_server()) 
+    main() 

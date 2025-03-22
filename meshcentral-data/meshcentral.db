@@ -1,5 +1,6 @@
 {"_id":"DatabaseIdentifier","value":"528ab33bd209902377a1779a2df4dcc800c9475901f867e4444a1dccc8584a8d8652cfa7cabc445e674d23b0ea8be0a7"}
 {"_id":"InvitationLinkEncryptionKey","key":"9068f2279413f44b0e14bcd5af5e32e44f40c1eb8ce594ebda1352dbea820edb1c145ae573dd67dfaa38f14fb957a08693fd8ac154390441e4343d3ce7f7038244b6904e94639963892ed62a3e2b2494","time":1742625581478}
+{"_id":"LastAutoBackupTime","value":1742671505225}
 {"_id":"LoginCookieEncryptionKey","key":"d3ca69fd7e0cfad99f9968684e8578f37cb126cabb0370e9cef9275acc10a22570d849eb5817b227d24ff8201ff4e299d643e0daa6532947762d6d139551c35dab24aecc94c7de874a6c101068797506","time":1742625581478}
 {"_id":"SchemaVersion","value":2}
 {"_id":"dbconfig","version":1,"amtWsEventSecret":"cafac6369a716d9b5eff1e992c00f40e0b1c627dfb878542d6e272a393f0b1cf"}
@@ -18,4 +19,3 @@
 {"$$indexCreated":{"fieldName":"nodeid","sparse":true}}
 {"$$indexCreated":{"fieldName":"email","sparse":true}}
 {"_id":"SchemaVersion","value":2}
-{"_id":"LastAutoBackupTime","value":1742671505225}

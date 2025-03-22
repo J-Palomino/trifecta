@@ -51,7 +51,7 @@ echo "Configuration updated for hostname: $HOSTNAME"
 echo "Setting up Python environment..."
 python3 -m venv /tmp/venv
 source /tmp/venv/bin/activate
-pip install aiohttp==3.8.5
+pip install aiohttp==3.8.5 cryptography
 
 # Start MeshCentral in the background
 echo "Starting MeshCentral server..."
