@@ -1,14 +1,18 @@
 services:
-  node-app:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "443:443"
       - "80:80"
+      - "8443:8443"
+      - "8080:8080"
     volumes:
       - .:/app
       - ./meshcentral-data:/app/meshcentral-data
     environment:
       NODE_ENV: production 
-      HOSTNAME: tee.up.railway.app 
+      HOSTNAME: tee.up.railway.app
+      PYTHONUNBUFFERED: 1
+    restart: unless-stopped 

@@ -1,20 +1,33 @@
-# Use the official Node.js 14 image as a parent image
-FROM node:16
+# Use the official Node.js 18 image as a parent image
+FROM node:18-slim
 
-# Set the working directory in the container to /app
+# Install Python and other dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up the application
 WORKDIR /app
 
-# Copy the package.json and package-lock.json files to the container
+# Copy package files first to leverage Docker cache
 COPY package*.json ./
+RUN npm install meshcentral
 
-# Install any needed packages specified in package.json
-RUN npm install
-
-# Copy the current directory contents into the container at /app
+# Copy the rest of the application
 COPY . .
 
-# Make port 3000 available to the world outside this container
-EXPOSE 443 
+# Set execute permissions for the startup script
+RUN chmod +x /app/start.sh
 
-# Run index.js when the container launches
-CMD ["node", "node_modules/meshcentral"] 
+# Expose ports
+EXPOSE 80 443 8080 8443
+
+# Set environment variables
+ENV NODE_ENV=production \
+    PYTHONUNBUFFERED=1
+
+# Run the startup script
+CMD ["/app/start.sh"] 

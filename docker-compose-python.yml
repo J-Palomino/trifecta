@@ -1,0 +1,40 @@
+services:
+  # MeshCentral service
+  meshcentral:
+    image: node:18
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./meshcentral-data:/app/meshcentral-data
+    ports:
+      - "8443:8443"
+      - "8080:8080"
+    environment:
+      NODE_ENV: production
+      HOSTNAME: tee.up.railway.app
+    command: >
+      bash -c "npm install meshcentral && node ./node_modules/meshcentral"
+    networks:
+      - app-network
+
+  # Python redirect handler
+  redirect-handler:
+    image: python:3.11
+    working_dir: /app
+    volumes:
+      - .:/app
+    ports:
+      - "443:443"
+      - "80:80"
+    environment:
+      PYTHONUNBUFFERED: 1
+    command: >
+      bash -c "pip install aiohttp && python redirect_handler.py"
+    depends_on:
+      - meshcentral
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge 

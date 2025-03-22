@@ -5,14 +5,13 @@
   "settings": {
     "cert": "tee.up.railway.app",
     "certUrl": "https://tee.up.railway.app",
-    "_WANonly": true,
-    "_LANonly": true,
-    "_sessionKey": "MyReallySecretPassword1",
-    "port": 443,
-    "redirPort": 80,
-    "tlsOffload": false,
-    "_aliasPort": 443,
-    "_redirAliasPort": 80
+    "port": 8443,
+    "redirPort": 8080,
+    "tlsOffload": true,
+    "allowLoginToken": true,
+    "WANonly": true,
+    "exactPort": false,
+    "trustedProxy": ["0.0.0.0/0"]
   },
   "domains": {
     "": {
