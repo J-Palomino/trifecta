@@ -2,9 +2,9 @@
   "name": "meshcentral-proxy",
   "version": "1.0.0",
   "description": "MeshCentral with redirect handler for Railway deployment",
-  "main": "redirect_handler.py",
+  "main": "index.js",
   "scripts": {
-    "start": "./start.sh"
+    "start": "node ./node_modules/meshcentral"
   },
   "dependencies": {
     "meshcentral": "^1.1.42"

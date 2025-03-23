@@ -19,15 +19,12 @@ RUN npm install meshcentral
 # Copy the rest of the application
 COPY . .
 
-# Set execute permissions for the startup script
-RUN chmod +x /app/start.sh
-
 # Expose ports
-EXPOSE 80 443 8080 8443
+EXPOSE 80 443
 
 # Set environment variables
 ENV NODE_ENV=production \
     PYTHONUNBUFFERED=1
 
-# Run the startup script
-CMD ["/app/start.sh"] 
+# Run MeshCentral directly
+CMD ["node", "./node_modules/meshcentral"] 

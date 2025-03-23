@@ -1,8 +1,9 @@
-time=1742685367736
+time=1742688091964
 state=running
-server-pid=41
-server-parent-pid=29
-redirect-port=8080
+server-pid=18
+server-parent-pid=1
+redirect-port=80
 mps-port=4433
 mps-name=tee.up.railway.app
-http-port=8443
+servername=tee.up.railway.app
+https-port=443

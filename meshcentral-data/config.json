@@ -1,19 +1,17 @@
 {
   "settings": {
     "cert": "tee.up.railway.app",
-    "certUrl": "https://tee.up.railway.app",
-    "port": 8443,
-    "redirPort": 8080,
+    "port": 443,
+    "redirPort": 80,
     "tlsOffload": true,
     "allowLoginToken": true,
     "WANonly": true,
-    "exactPort": false,
+    "exactPort": true,
     "trustedProxy": ["0.0.0.0/0"]
   },
   "domains": {
     "": {
       "title": "TreeTee",
-      "certUrl": "https://tee.up.railway.app" ,
       "newAccounts": false,
       "ipkvm": false
     }
@@ -21,7 +19,7 @@
   "letsencrypt": {
     "email": "notabot@juangpt.com",
     "names": "tee.up.railway.app",
-    "skipChallengeVerification": true,
+    "skipChallengeVerification": false,
     "production": true
   }
 }

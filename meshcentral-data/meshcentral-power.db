@@ -5,6 +5,7 @@
 {"time":{"$$date":1742630265409},"nodeid":"*","power":0,"s":1,"_id":"GU5fbtl7lVq9voar"}
 {"time":{"$$date":1742673809739},"nodeid":"*","power":0,"s":1,"_id":"I7CDEIp3cD2cWN1S"}
 {"time":{"$$date":1742628111920},"nodeid":"*","power":0,"s":1,"_id":"IxI0kcE0qEKP23ZH"}
+{"time":{"$$date":1742685366091},"nodeid":"*","power":0,"s":1,"_id":"JzHQr1oJJyHB8Vgs"}
 {"time":{"$$date":1742666442468},"nodeid":"*","power":0,"s":1,"_id":"KbgKxbggukVwXpi0"}
 {"time":{"$$date":1742666854712},"nodeid":"*","power":0,"s":1,"_id":"NX4wGVx4I2XXUkRH"}
 {"time":{"$$date":1742626833709},"nodeid":"*","power":0,"s":1,"_id":"QL6kvF84D9OQS6eu"}
@@ -19,5 +20,5 @@
 {"$$indexCreated":{"fieldName":"nodeid","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"time","unique":false,"sparse":false}}
 {"$$indexCreated":{"fieldName":"nodeid"}}
-{"time":{"$$date":1742685366091},"nodeid":"*","power":0,"s":1,"_id":"JzHQr1oJJyHB8Vgs"}
 {"$$indexCreated":{"fieldName":"time","expireAfterSeconds":864000}}
+{"time":{"$$date":1742688084036},"nodeid":"*","power":0,"s":1,"_id":"diH1Lg7tMZJ0kBur"}
