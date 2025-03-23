@@ -1,0 +1,18 @@
+services:
+  echo-server:
+  
+    image: ghcr.io/j-palomino/openai-cua-sample-app:latest
+    init: true
+    network_mode: host
+    restart: unless-stopped
+    platform: linux/amd64/v8
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - .:/app
+      - ./meshcentral-data:/app/meshcentral-data
+    environment:
+      NODE_ENV: production 
+      HOSTNAME: tee.up.railway.app
+      PYTHONUNBUFFERED: 1

@@ -1,7 +1,7 @@
 # Use the official Node.js 18 image as a parent image
 FROM node:18-slim
 
-# Install Python and other dependencies
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
@@ -19,15 +19,12 @@ RUN npm install meshcentral
 # Copy the rest of the application
 COPY . .
 
-# Set execute permissions for the startup script
-RUN chmod +x /app/start.sh
-
 # Expose ports
-EXPOSE 80 443 8080 8443
+EXPOSE 80 443
 
 # Set environment variables
 ENV NODE_ENV=production \
     PYTHONUNBUFFERED=1
 
-# Run the startup script
-CMD ["/app/start.sh"] 
+# Run MeshCentral directly
+CMD ["node", "./node_modules/meshcentral"] 
