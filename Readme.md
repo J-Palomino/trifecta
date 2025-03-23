@@ -1,6 +1,6 @@
 # TreeTee: AI Agent Monitoring & Control Platform
 
-![AI Agent at Work](https://i.imgur.com/JzT9MQV.png)
+![AI Agent at Work](https://media1.giphy.com/media/mTxnhJyiVYTUA/giphy_s.gif?cid=6c09b952snrxtrklyp25g9h06jz0y0qqw20l3neyh21hp41n&ep=v1_gifs_search&rid=giphy_s.gif&ct=g)
 
 **The Universal Handshake Protocol: Bridging AI Agents, Virtual Machines, and Human Control**
 
