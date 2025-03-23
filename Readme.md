@@ -1,82 +1,120 @@
-# MeshCentral with Redirect Handler for Railway
+# TreeTee: AI Agent Monitoring & Control Platform
 
-This repository contains a MeshCentral setup with a custom redirect handler designed to work smoothly on Railway.app.
+![AI Agent at Work](https://i.imgur.com/JzT9MQV.png)
 
-## Features
+**The Universal Handshake Protocol: Bridging AI Agents, Virtual Machines, and Human Control**
 
-- MeshCentral server running in WAN mode
-- Custom Python redirect handler to prevent redirect loops
-- Docker setup for easy deployment
+TreeTee is a comprehensive platform that allows AI agents to use computers exactly as humans do, providing secure monitoring, tracing, and remote control capabilities for both virtual and physical machines.
 
-## Deployment to Railway
+## 🚀 Overview
 
-### Option 1: Railway CLI
+TreeTee bridges the gap between AI agents and computer systems by creating a secure monitoring environment where:
 
-1. Install the Railway CLI:
-   ```
-   npm install -g @railway/cli
-   ```
+- AI agents can control virtual and physical machines via VNC/RDP
+- Humans can observe agent actions in real-time
+- Users can take over control at any time with native mouse and keyboard
+- All sessions run in secure, verified Trusted Execution Environments (TEEs)
 
-2. Login to Railway:
-   ```
-   railway login
-   ```
+![Human vs AI Control](https://i.imgur.com/s9sLMCU.jpg)
 
-3. Link to your Railway project:
-   ```
-   railway link
-   ```
+## 🔒 Security & Verification
 
-4. Deploy:
-   ```
-   railway up
-   ```
+TreeTee operates completely in the cloud with strong security guarantees:
 
-### Option 2: GitHub Repository Deployment
+- All components are containerized for consistent deployment
+- Runs in verified TEEs (Trusted Execution Environments)
+- Certificates for agent control are generated and signed within the original containers
+- Access is limited to authorized accounts only
+- [Verified by Phala Network TEE](https://cloud.phala.network/explorer/app_48dc0b7e647cbbfef16f2ae6cf2d5ca99d129402)
 
-1. Fork this repository to your GitHub account
-2. Connect to Railway.app and create a new project
-3. Choose "Deploy from GitHub repo"
-4. Select your forked repository
-5. Railway will automatically build and deploy the application
+![Security Meme](https://i.imgur.com/xFzY1XE.jpg)
 
-### Option 3: Deploy from Template
+## 🧩 Core Components
 
-1. Click the "Deploy on Railway" button
-2. Follow the instructions to set up your project
+### 1. TreeTee VNC Monitoring Tool and Agent Deployer
+The central monitoring platform that allows you to:
+- Deploy and manage AI agents
+- Monitor agent activities in real-time
+- Take over control when needed
+- Grant selective access to capabilities
 
-## Custom Domain Setup
+### 2. CUA-API/VM (Computer Use Agent)
+The virtual machine and API used by AI agents to:
+- Execute actions on virtual or physical machines
+- Process LLM commands through the Python intermediary server
+- Provide VNC/RDP access to the controlled machine
+- Enable file sharing, terminal access, and messaging
 
-1. In the Railway Dashboard, go to Settings
-2. Under "Domains", add your custom domain
-3. Update the DNS records as instructed by Railway
-4. The application will automatically use your custom domain
+![AI Agent Remote Control](https://i.imgur.com/gGm9kGD.jpg)
 
-## Environment Variables
+## 🔌 Integration with Open Source Tools
 
-You can configure the following environment variables in Railway:
+TreeTee leverages battle-tested open source technologies:
 
-- `HOSTNAME`: Your domain name (defaults to your Railway subdomain)
-- `NODE_ENV`: Set to "production" for production environments
+- **MeshCentral**: For secure remote device management
+- **Goose**: For virtualization and machine control
+- **Privy**: For secure authentication and identity management
 
-## Troubleshooting
+## 🚪 Access Control & Sharing
 
-### Redirect Loops
+TreeTee provides granular control over agent capabilities:
+- Programmatically grant temporary access to specific agent capabilities
+- Share or sell access to your agents with fine-grained permissions
+- Control desktop viewing, interaction, file sharing, terminal access, and messaging
 
-If you encounter redirect loops, check the logs for detailed information about the request and response flow.
+![Access Control](https://i.imgur.com/d8tU3fl.jpg)
 
-### Certificate Issues
+## 🏁 Getting Started
 
-The application automatically uses Railway's TLS certificates. If you encounter certificate issues, ensure your custom domain is properly set up in Railway's dashboard.
+### Quick Start with Docker
 
-## Local Development
+1. Deploy TreeTee monitoring platform:
 
-To run the application locally:
+```bash
+# Clone the repository
+git clone https://github.com/J-Palomino/trifecta.git
+cd trifecta
 
+# Launch using docker-compose
+docker-compose up -d
 ```
-docker-compose up
+
+2. Deploy the Computer Use Agent VM:
+
+```bash
+docker pull ghcr.io/j-palomino/openai-cua-sample-app:latest
+docker run -d -p 3000:3000 ghcr.io/j-palomino/openai-cua-sample-app:latest
 ```
 
-This will start MeshCentral and the redirect handler, making them accessible at:
-- HTTP: http://localhost:80
-- HTTPS: https://localhost:443
+![Docker Meme](https://i.imgur.com/YuV5U8a.jpg)
+
+### Configuration
+
+1. Configure the `.env` file based on the `.env.example` provided
+2. Set up authentication credentials for Privy integration
+3. Configure MeshCentral for your specific deployment needs
+
+## 🔧 Advanced Use Cases
+
+- **Commercial Deployment**: Create AI agents that perform tasks on behalf of users
+- **Development & Testing**: Create automated workflows for software testing
+- **Customer Support**: Deploy agents that can assist users by demonstrating procedures
+- **Training & Education**: Create AI tutors that can demonstrate computer skills
+
+![AI Use Cases](https://i.imgur.com/lKL4alE.jpg)
+
+## 🌐 Resources
+
+- [GitHub Repository](https://github.com/J-Palomino/trifecta)
+- [Phala TEE Verification](https://cloud.phala.network/explorer/app_48dc0b7e647cbbfef16f2ae6cf2d5ca99d129402)
+- [Docker Hub - CUA Agent](https://hub.docker.com/r/ghcr.io/j-palomino/openai-cua-sample-app)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+![Contributing Meme](https://i.imgur.com/DHpz60d.jpg)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
