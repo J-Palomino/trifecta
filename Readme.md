@@ -90,9 +90,30 @@ docker run -d -p 3000:3000 ghcr.io/j-palomino/openai-cua-sample-app:latest
 
 ### Configuration
 
-1. Configure the `.env` file based on the `.env.example` provided
-2. Set up authentication credentials for Privy integration
-3. Configure MeshCentral for your specific deployment needs
+1. **Create environment configuration:**
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env with your actual values
+   nano .env
+   ```
+
+2. **Required environment variables:**
+   - `HOSTNAME` - Your deployment domain
+   - `LETSENCRYPT_EMAIL` - Email for SSL certificate registration
+
+3. **Generate configuration files:**
+   ```bash
+   chmod +x generate-config.sh
+   ./generate-config.sh
+   ```
+
+4. **Security Note:** Never commit `.env` or certificate files to version control. See [SECURITY.md](SECURITY.md) for details.
+
+5. Set up authentication credentials for Privy integration (see documentation)
+
+6. Configure MeshCentral for your specific deployment needs
 
 ## 🔧 Advanced Use Cases
 
@@ -109,9 +130,33 @@ docker run -d -p 3000:3000 ghcr.io/j-palomino/openai-cua-sample-app:latest
 - [Phala TEE Verification](https://cloud.phala.network/explorer/app_48dc0b7e647cbbfef16f2ae6cf2d5ca99d129402)
 - [Docker Hub - CUA Agent](https://hub.docker.com/r/ghcr.io/j-palomino/openai-cua-sample-app)
 
+## 🔐 Security
+
+TreeTee takes security seriously. This repository follows security best practices:
+
+- **No hardcoded secrets** - All sensitive data uses environment variables
+- **Certificate management** - SSL/TLS certificates are never committed to version control
+- **GitHub Secrets integration** - CI/CD pipelines use GitHub Secrets Manager
+- **Regular audits** - Dependencies and code are regularly scanned for vulnerabilities
+
+### Important Security Files
+
+- **[SECURITY.md](SECURITY.md)** - Security policy and best practices
+- **[MIGRATION.md](MIGRATION.md)** - Guide for migrating to secure configuration
+- **[.env.example](.env.example)** - Template for environment variables
+
+### Reporting Security Issues
+
+If you discover a security vulnerability, please review our [Security Policy](SECURITY.md) for responsible disclosure guidelines.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+**Before contributing:**
+1. Review [SECURITY.md](SECURITY.md) for security guidelines
+2. Never commit secrets, certificates, or `.env` files
+3. Use environment variables for all configuration
 
 ![Contributing Meme](https://i.imgur.com/DHpz60d.jpg)
 

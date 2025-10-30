@@ -9,8 +9,10 @@ services:
     volumes:
       - .:/app
       - ./meshcentral-data:/app/meshcentral-data
+    env_file:
+      - .env
     environment:
-      NODE_ENV: production 
-      HOSTNAME: tee.up.railway.app
-      PYTHONUNBUFFERED: 1
+      NODE_ENV: ${NODE_ENV:-production}
+      HOSTNAME: ${HOSTNAME}
+      PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
     restart: unless-stopped 
