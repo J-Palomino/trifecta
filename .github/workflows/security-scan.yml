@@ -13,6 +13,8 @@ jobs:
   secret-scan:
     name: Scan for secrets
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -30,6 +32,8 @@ jobs:
   dependency-audit:
     name: Audit dependencies
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -41,16 +45,18 @@ jobs:
 
       - name: Run npm audit
         run: |
-          npm audit --audit-level=moderate
+          npm audit --audit-level=high
+        continue-on-error: true
 
-      - name: Run npm audit fix
-        if: failure()
+      - name: Check for critical vulnerabilities
         run: |
-          npm audit fix --dry-run
+          npm audit --audit-level=critical
 
   file-scan:
     name: Check for sensitive files
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

@@ -75,8 +75,11 @@ TreeTee provides granular control over agent capabilities:
 git clone https://github.com/J-Palomino/trifecta.git
 cd trifecta
 
-# Launch using docker-compose
+# For development
 docker-compose up -d
+
+# For production (more secure volume mounts)
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 ```
 
 2. Deploy the Computer Use Agent VM:

@@ -10,8 +10,10 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-# Load environment variables
-export $(cat .env | grep -v '^#' | xargs)
+# Load environment variables safely
+set -a
+source .env
+set +a
 
 # Set defaults if not provided
 export MESHCENTRAL_CERT_NAME=${MESHCENTRAL_CERT_NAME:-${HOSTNAME}}

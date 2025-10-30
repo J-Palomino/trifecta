@@ -7,6 +7,8 @@ services:
       - "443:443"
       - "80:80"
     volumes:
+      # Note: For production, consider mounting only necessary directories
+      # instead of the entire repository to reduce exposure
       - .:/app
       - ./meshcentral-data:/app/meshcentral-data
     env_file:

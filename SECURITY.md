@@ -257,8 +257,10 @@ git push --force --tags
 
 ## Contact
 
-For security concerns, please contact the maintainers at: [REDACTED - Add your security contact]
+For security concerns, please contact the repository maintainers:
+- Open a security advisory on GitHub (preferred for vulnerabilities)
+- Email: [Repository owner's email - to be configured]
 
 ---
 
-Last updated: 2025-10-30
+Last updated: 2024-10-30
