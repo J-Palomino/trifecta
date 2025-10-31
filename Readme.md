@@ -141,12 +141,26 @@ TreeTee takes security seriously. This repository follows security best practice
 - **Certificate management** - SSL/TLS certificates are never committed to version control
 - **GitHub Secrets integration** - CI/CD pipelines use GitHub Secrets Manager
 - **Regular audits** - Dependencies and code are regularly scanned for vulnerabilities
+- **Automated workflows** - GitHub Actions for CI/CD, security scans, and deployment
+
+### Automated CI/CD
+
+This repository includes automated GitHub Actions workflows:
+
+- **Continuous Integration** - Automated testing and building on every push
+- **Security Scanning** - Regular dependency audits and secret scanning
+- **Docker Publishing** - Automatic Docker image builds and publishing
+- **Deployment** - Automated deployment to Railway or via SSH
+- **Secret Management** - Validation and rotation reminders
+
+📚 **[GitHub Actions Setup Guide](.github/ACTIONS_SETUP.md)** - Complete guide for configuring workflows and secrets
 
 ### Important Security Files
 
 - **[SECURITY.md](SECURITY.md)** - Security policy and best practices
 - **[MIGRATION.md](MIGRATION.md)** - Guide for migrating to secure configuration
 - **[.env.example](.env.example)** - Template for environment variables
+- **[.github/ACTIONS_SETUP.md](.github/ACTIONS_SETUP.md)** - GitHub Actions configuration guide
 
 ### Reporting Security Issues
 

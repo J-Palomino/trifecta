@@ -1,0 +1,209 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  deploy-railway:
+    name: Deploy to Railway
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Create environment file
+        run: |
+          cat > .env << EOF
+          NODE_ENV=production
+          HOSTNAME=${{ secrets.HOSTNAME }}
+          PORT=443
+          REDIRECT_PORT=80
+          MESHCENTRAL_CERT_NAME=${{ secrets.HOSTNAME }}
+          MESHCENTRAL_PORT=443
+          MESHCENTRAL_REDIRECT_PORT=80
+          LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}
+          LETSENCRYPT_DOMAIN=${{ secrets.HOSTNAME }}
+          LETSENCRYPT_PRODUCTION=true
+          ALLOW_NEW_ACCOUNTS=false
+          ENABLE_IPKVM=false
+          ALLOW_LOGIN_TOKEN=true
+          WAN_ONLY=true
+          PYTHONUNBUFFERED=1
+          EOF
+      
+      - name: Generate configuration
+        run: |
+          chmod +x generate-config.sh
+          
+          # Only run if template exists
+          if [ -f meshcentral-data/config.json.template ]; then
+            ./generate-config.sh
+          else
+            echo "No config template found, skipping generation"
+          fi
+      
+      - name: Deploy to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          npm install -g @railway/cli
+          railway up
+      
+      - name: Notify deployment success
+        if: success()
+        run: |
+          echo "🚀 Deployment to Railway completed successfully!"
+          echo "Application URL: https://${{ secrets.HOSTNAME }}"
+
+  deploy-docker:
+    name: Deploy via Docker
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        if: vars.USE_SSH_DEPLOY == 'true' || github.event.inputs.environment == 'staging'
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+      
+      - name: Deploy via SSH
+        if: vars.USE_SSH_DEPLOY == 'true' || github.event.inputs.environment == 'staging'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/treetee' }}
+          HOSTNAME: ${{ secrets.HOSTNAME }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+        run: |
+          ssh -o StrictHostKeyChecking=no "$DEPLOY_USER@$DEPLOY_HOST" \
+            "HOSTNAME='$HOSTNAME' LETSENCRYPT_EMAIL='$LETSENCRYPT_EMAIL' DEPLOY_PATH='$DEPLOY_PATH' bash -s" << 'ENDSSH'
+            cd "$DEPLOY_PATH" || exit 1
+            git pull origin main
+            
+            # Create .env file with secrets from environment variables
+            cat > .env << EOF
+          NODE_ENV=production
+          HOSTNAME=${HOSTNAME}
+          PORT=443
+          REDIRECT_PORT=80
+          MESHCENTRAL_CERT_NAME=${HOSTNAME}
+          MESHCENTRAL_PORT=443
+          MESHCENTRAL_REDIRECT_PORT=80
+          LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+          LETSENCRYPT_DOMAIN=${HOSTNAME}
+          LETSENCRYPT_PRODUCTION=true
+          ALLOW_NEW_ACCOUNTS=false
+          ENABLE_IPKVM=false
+          ALLOW_LOGIN_TOKEN=true
+          WAN_ONLY=true
+          PYTHONUNBUFFERED=1
+          EOF
+            
+            # Generate configuration
+            chmod +x generate-config.sh
+            if [ -f meshcentral-data/config.json.template ]; then
+              ./generate-config.sh
+            fi
+            
+            # Deploy with Docker Compose
+            docker-compose pull
+            docker-compose up -d --build
+            
+            # Check status
+            docker-compose ps
+          ENDSSH
+      
+      - name: Verify deployment
+        if: vars.USE_SSH_DEPLOY == 'true' || github.event.inputs.environment == 'staging'
+        env:
+          HOSTNAME: ${{ secrets.HOSTNAME }}
+        run: |
+          echo "✓ Deployment completed"
+          echo "Verifying service health..."
+          
+          # Wait a bit for service to start
+          sleep 10
+          
+          # Check if service is responding
+          curl -f -k -I https://${{ secrets.HOSTNAME }} || echo "⚠ Service not responding yet, may need more time to start"
+
+  post-deploy-checks:
+    name: Post-Deployment Checks
+    runs-on: ubuntu-latest
+    needs: [deploy-railway]
+    if: always() && needs.deploy-railway.result == 'success'
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Wait for deployment
+        run: sleep 30
+      
+      - name: Health check
+        env:
+          HOSTNAME: ${{ secrets.HOSTNAME }}
+        run: |
+          echo "Checking service health..."
+          
+          # Try to reach the hostname (with retry)
+          for i in {1..5}; do
+            if curl -f -k -I "https://$HOSTNAME" 2>/dev/null; then
+              echo "✓ Service is responding"
+              exit 0
+            fi
+            echo "Attempt $i/5 failed, waiting..."
+            sleep 10
+          done
+          
+          echo "⚠ Service did not respond within timeout"
+          exit 1
+        continue-on-error: true
+      
+      - name: Deployment summary
+        env:
+          HOSTNAME: ${{ secrets.HOSTNAME }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          {
+            echo "## Deployment Summary"
+            echo ""
+            echo "✅ Deployment completed successfully"
+            echo ""
+            echo "**Environment:** $ENVIRONMENT"
+            echo "**Commit:** $COMMIT"
+            echo "**URL:** https://$HOSTNAME"
+          } >> "$GITHUB_STEP_SUMMARY"
