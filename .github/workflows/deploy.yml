@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'production' }}
     if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -84,6 +86,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.event.inputs.environment || 'production' }}
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging'
+    permissions:
+      contents: read
     
     steps:
       - name: Checkout code
@@ -161,6 +165,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [deploy-railway]
     if: always() && needs.deploy-railway.result == 'success'
+    permissions:
+      contents: read
     
     steps:
       - name: Wait for deployment
