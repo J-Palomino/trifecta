@@ -17,6 +17,7 @@ This security audit was performed to identify hardcoded secrets, keys, and sensi
 
 - ✅ **7 Critical Issues** identified and remediation provided
 - ✅ **3 Medium Issues** identified and remediation provided
+- ✅ Sensitive files removed from version control
 - ✅ Complete migration path documented
 - ✅ Automated security scanning implemented
 - ✅ GitHub Secrets integration configured
@@ -44,11 +45,12 @@ This security audit was performed to identify hardcoded secrets, keys, and sensi
 
 **Remediation:**
 1. ✅ Added to `.gitignore`
-2. ⚠️ **MUST** be removed from git history (see MIGRATION.md)
-3. ✅ Certificate paths now use environment variables
-4. ⚠️ **MUST** rotate/regenerate certificates after cleanup
+2. ✅ Removed from version control (no longer tracked)
+3. ⚠️ **MUST** be removed from git history (see MIGRATION.md)
+4. ✅ Certificate paths now use environment variables
+5. ⚠️ **MUST** rotate/regenerate certificates after cleanup
 
-**Implementation Status:** Files excluded from future commits, history cleanup required
+**Implementation Status:** Files removed from tracking and excluded from future commits, git history cleanup still required
 
 ---
 
@@ -72,11 +74,12 @@ This security audit was performed to identify hardcoded secrets, keys, and sensi
 
 **Remediation:**
 1. ✅ Added to `.gitignore`
-2. ⚠️ **MUST** remove from git history
-3. ⚠️ **MUST** regenerate all MeshCentral certificates
-4. ⚠️ **MUST** rotate all agent keys
+2. ✅ Removed from version control (no longer tracked)
+3. ⚠️ **MUST** remove from git history
+4. ⚠️ **MUST** regenerate all MeshCentral certificates
+5. ⚠️ **MUST** rotate all agent keys
 
-**Implementation Status:** Files excluded from future commits, regeneration required
+**Implementation Status:** Files removed from tracking and excluded from future commits, git history cleanup and regeneration still required
 
 ---
 

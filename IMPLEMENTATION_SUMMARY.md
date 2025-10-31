@@ -42,7 +42,12 @@ Performed a comprehensive security audit identifying:
 - Backup files
 - OS and IDE specific files
 
-**Result:** Future commits cannot accidentally include secrets.
+**Removed from version control:**
+- `cert.pem` and `key.pem` - Root SSL certificate and private key
+- All MeshCentral private keys (`*-private.key`)
+- All MeshCentral public certificates (`*-public.crt`)
+
+**Result:** Files no longer tracked, future commits cannot accidentally include secrets.
 
 ### 4. Docker Security Improvements ✅
 
@@ -179,14 +184,15 @@ chmod +x .git/hooks/pre-commit
 ### 🔴 CRITICAL - Must Do Immediately
 
 #### 1. Clean Git History
-The following files are currently in git history and must be removed:
+The following files have been removed from version control in this PR, but remain in git history and must be cleaned:
 
-**Files to remove:**
+**Files removed from tracking:**
 - `cert.pem` - SSL certificate
 - `key.pem` - Private key (UNENCRYPTED!)
 - `meshcentral-data/*-private.key` - All MeshCentral keys
+- `meshcentral-data/*-public.crt` - All MeshCentral certificates
 
-**How to remove:**
+**How to clean history:**
 ```bash
 # Using git-filter-repo (recommended)
 pip install git-filter-repo
@@ -332,14 +338,14 @@ Before considering security hardening complete:
 
 | Category | Before | After |
 |----------|--------|-------|
-| **Secrets in Git** | Yes (7+ files) | No (gitignored) |
+| **Secrets in Git** | Yes (12 files tracked) | No (removed from tracking) |
 | **Hardcoded Values** | Email, domain, etc. | Environment variables |
 | **Documentation** | None | 11,000+ words |
 | **Automated Scanning** | None | 4 workflows |
 | **Configuration Management** | Manual | Template-based |
 | **Docker Security** | Basic | Production-hardened |
 | **Pre-commit Checks** | None | Comprehensive |
-| **Risk Level** | 🔴 Critical | 🟢 Low (after cleanup) |
+| **Risk Level** | 🔴 Critical | 🟡 Medium (history cleanup needed) |
 
 ---
 
