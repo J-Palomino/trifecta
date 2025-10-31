@@ -91,35 +91,41 @@ jobs:
       
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.9.0
-        if: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+        if: vars.USE_SSH_DEPLOY == 'true' || github.event.inputs.environment == 'staging'
         with:
           ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
       
       - name: Deploy via SSH
-        if: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_SSH_KEY != '' }}
+        if: vars.USE_SSH_DEPLOY == 'true' || github.event.inputs.environment == 'staging'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/treetee' }}
+          HOSTNAME: ${{ secrets.HOSTNAME }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ENDSSH'
-            cd ${{ secrets.DEPLOY_PATH || '/opt/treetee' }}
+          ssh -o StrictHostKeyChecking=no "$DEPLOY_USER@$DEPLOY_HOST" << 'ENDSSH'
+            cd "$DEPLOY_PATH"
             git pull origin main
             
             # Create .env file with secrets
-            cat > .env << EOF
+            cat > .env << 'ENVEOF'
           NODE_ENV=production
-          HOSTNAME=${{ secrets.HOSTNAME }}
+          HOSTNAME='$HOSTNAME'
           PORT=443
           REDIRECT_PORT=80
-          MESHCENTRAL_CERT_NAME=${{ secrets.HOSTNAME }}
+          MESHCENTRAL_CERT_NAME='$HOSTNAME'
           MESHCENTRAL_PORT=443
           MESHCENTRAL_REDIRECT_PORT=80
-          LETSENCRYPT_EMAIL=${{ secrets.LETSENCRYPT_EMAIL }}
-          LETSENCRYPT_DOMAIN=${{ secrets.HOSTNAME }}
+          LETSENCRYPT_EMAIL='$LETSENCRYPT_EMAIL'
+          LETSENCRYPT_DOMAIN='$HOSTNAME'
           LETSENCRYPT_PRODUCTION=true
           ALLOW_NEW_ACCOUNTS=false
           ENABLE_IPKVM=false
           ALLOW_LOGIN_TOKEN=true
           WAN_ONLY=true
           PYTHONUNBUFFERED=1
-          EOF
+          ENVEOF
             
             # Generate configuration
             chmod +x generate-config.sh
@@ -136,7 +142,9 @@ jobs:
           ENDSSH
       
       - name: Verify deployment
-        if: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_USER != '' && secrets.DEPLOY_SSH_KEY != '' }}
+        if: vars.USE_SSH_DEPLOY == 'true' || github.event.inputs.environment == 'staging'
+        env:
+          HOSTNAME: ${{ secrets.HOSTNAME }}
         run: |
           echo "✓ Deployment completed"
           echo "Verifying service health..."
@@ -163,7 +171,7 @@ jobs:
           
           # Try to reach the hostname (with retry)
           for i in {1..5}; do
-            if curl -f -k -I https://${{ secrets.HOSTNAME }} 2>/dev/null; then
+            if curl -f -k -I "https://$HOSTNAME" 2>/dev/null; then
               echo "✓ Service is responding"
               exit 0
             fi
@@ -176,11 +184,17 @@ jobs:
         continue-on-error: true
       
       - name: Deployment summary
+        env:
+          HOSTNAME: ${{ secrets.HOSTNAME }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'production' }}
+          COMMIT: ${{ github.sha }}
         run: |
-          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Deployment completed successfully" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Environment:** ${{ github.event.inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "**URL:** https://${{ secrets.HOSTNAME }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Deployment Summary"
+            echo ""
+            echo "✅ Deployment completed successfully"
+            echo ""
+            echo "**Environment:** $ENVIRONMENT"
+            echo "**Commit:** $COMMIT"
+            echo "**URL:** https://$HOSTNAME"
+          } >> "$GITHUB_STEP_SUMMARY"
