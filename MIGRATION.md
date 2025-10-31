@@ -145,11 +145,24 @@ For CI/CD and GitHub Actions:
 3. Click "New repository secret"
 4. Add these secrets:
 
+#### Required Secrets
+
 | Secret Name | Description | Example Value |
 |------------|-------------|---------------|
 | `HOSTNAME` | Your deployment domain | `tee.yourdomain.com` |
 | `LETSENCRYPT_EMAIL` | Your email for Let's Encrypt | `admin@yourdomain.com` |
-| `RAILWAY_TOKEN` | Railway deployment token (if using) | `railway_xxx...` |
+
+#### Optional Secrets (Deployment-Specific)
+
+| Secret Name | Description | When Needed |
+|------------|-------------|-------------|
+| `RAILWAY_TOKEN` | Railway deployment token | For Railway deployment |
+| `DEPLOY_HOST` | SSH server hostname | For SSH/Docker deployment |
+| `DEPLOY_USER` | SSH username | For SSH/Docker deployment |
+| `DEPLOY_SSH_KEY` | SSH private key | For SSH/Docker deployment |
+| `DEPLOY_PATH` | Application path on server | For SSH deployment (optional, default: /opt/treetee) |
+
+**📚 For detailed GitHub Actions setup instructions, see [.github/ACTIONS_SETUP.md](.github/ACTIONS_SETUP.md)**
 
 ### Step 10: Update Documentation
 

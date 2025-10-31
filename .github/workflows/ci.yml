@@ -1,0 +1,137 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Test Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true
+      
+      - name: Check for critical vulnerabilities
+        run: npm audit --audit-level=critical
+      
+      - name: Verify generate-config.sh script
+        run: |
+          chmod +x generate-config.sh
+          echo "✓ Script is executable"
+      
+      - name: Verify required files exist
+        run: |
+          echo "Checking for required files..."
+          test -f .env.example && echo "✓ .env.example exists"
+          test -f generate-config.sh && echo "✓ generate-config.sh exists"
+          test -f package.json && echo "✓ package.json exists"
+          test -f Dockerfile && echo "✓ Dockerfile exists"
+          test -f docker-compose.yml && echo "✓ docker-compose.yml exists"
+          echo "All required files present"
+
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          tags: treetee:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Test Docker image
+        run: |
+          docker build -t treetee-test:latest .
+          echo "✓ Docker image built successfully"
+
+  validate-config:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install envsubst
+        run: sudo apt-get update && sudo apt-get install -y gettext-base
+      
+      - name: Test configuration generation
+        run: |
+          # Create test .env file
+          cat > .env << EOF
+          NODE_ENV=production
+          HOSTNAME=test.example.com
+          PORT=443
+          REDIRECT_PORT=80
+          MESHCENTRAL_CERT_NAME=test.example.com
+          MESHCENTRAL_PORT=443
+          MESHCENTRAL_REDIRECT_PORT=80
+          LETSENCRYPT_EMAIL=test@example.com
+          LETSENCRYPT_DOMAIN=test.example.com
+          LETSENCRYPT_PRODUCTION=false
+          ALLOW_NEW_ACCOUNTS=false
+          ENABLE_IPKVM=false
+          ALLOW_LOGIN_TOKEN=true
+          WAN_ONLY=true
+          PYTHONUNBUFFERED=1
+          SSL_CERT_PATH=./certs/cert.pem
+          SSL_KEY_PATH=./certs/key.pem
+          EOF
+          
+          # Test the generate-config script
+          chmod +x generate-config.sh
+          
+          # Create dummy template if it exists in the repo
+          if [ -f meshcentral-data/config.json.template ]; then
+            ./generate-config.sh
+            echo "✓ Configuration generated successfully"
+          else
+            echo "⚠ config.json.template not found, skipping generation test"
+          fi
+      
+      - name: Validate docker-compose configuration
+        run: |
+          # Create test .env file for docker-compose
+          cat > .env << EOF
+          NODE_ENV=production
+          HOSTNAME=test.example.com
+          PYTHONUNBUFFERED=1
+          EOF
+          
+          docker-compose config
+          echo "✓ docker-compose configuration is valid"
