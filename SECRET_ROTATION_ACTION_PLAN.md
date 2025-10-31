@@ -1,0 +1,389 @@
+# Secret Rotation Action Plan
+
+## Current Status
+
+### Test Results Summary
+
+✅ **PASSING:**
+- No .env files in current commit
+- No certificate files in current commit
+- .gitignore properly configured
+- .env.example exists as template
+- Pre-commit hook script exists
+- config.json.template exists
+
+❌ **FAILING:**
+- **CRITICAL**: Private keys found in git history
+- **CRITICAL**: config.json tracked by git (should be generated)
+- Pre-commit hook not installed locally
+- docker-compose.yml configuration errors
+
+### Where Secrets ARE Currently Stored
+
+**1. Git History (PROBLEM!):**
+- `cert.pem`, `key.pem` in root
+- Multiple `*-private.key` files in `meshcentral-data/`
+- `meshcentral-data/config.json` with email/domain
+
+**2. Git Current Working Tree (GOOD):**
+- No secrets in current files (removed in commit 5c58a15)
+- All sensitive files gitignored
+
+**3. Local Development (CORRECT):**
+- Should use `.env` file (not committed to git)
+- Currently no `.env` exists locally
+
+**4. Production/Railway (CORRECT):**
+- Environment variables in Railway dashboard
+- GitHub Secrets for CI/CD
+
+## Why This is a Problem
+
+Even though secrets were removed from the current codebase, they remain in git history:
+
+```bash
+# Anyone can access old secrets:
+git checkout 0beb9ad  # Old commit before cleanup
+ls *.pem *.key        # Old certificates visible
+cat meshcentral-data/config.json  # Email/domain visible
+```
+
+**Impact:** Anyone with read access to the repository (including past collaborators, forks, or clones) can retrieve these old private keys.
+
+## Action Items
+
+### Immediate Actions (Do Today)
+
+#### 1. Update .gitignore (DONE ✅)
+Already updated to include `meshcentral-data/config.json`.
+
+#### 2. Remove config.json from git tracking
+
+```bash
+# Remove from git but keep local file
+git rm --cached meshcentral-data/config.json
+
+# Commit the change
+git commit -m "Remove config.json from git tracking - should be generated from template"
+```
+
+#### 3. Install pre-commit hook
+
+```bash
+# Install the hook
+cp .github/pre-commit-hook.sh .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+
+# Test it works
+echo "test=secret" > .env.test
+git add .env.test
+git commit -m "test"  # Should FAIL
+rm .env.test
+```
+
+#### 4. Create local .env file
+
+```bash
+# Copy template
+cp .env.example .env
+
+# Edit with your values
+nano .env  # or your preferred editor
+
+# Required values:
+# - HOSTNAME=your-domain.com
+# - LETSENCRYPT_EMAIL=your-email@example.com
+```
+
+### High Priority (This Week)
+
+#### 5. Clean Git History
+
+**WARNING:** This rewrites git history and affects all users!
+
+**Before running:**
+1. Coordinate with all team members
+2. Ensure all work is committed and pushed
+3. Have everyone push their branches
+
+**Execute cleanup:**
+
+```bash
+# Make script executable
+chmod +x cleanup-secrets.sh
+
+# Review what it will do
+cat cleanup-secrets.sh
+
+# Run the cleanup
+./cleanup-secrets.sh
+```
+
+**OR manually using git filter-branch:**
+
+```bash
+# Backup first!
+git branch backup-before-cleanup-$(date +%Y%m%d)
+
+# Remove all .pem, .key, .crt files
+git filter-branch --force --index-filter \
+  'git rm --cached --ignore-unmatch *.pem *.key *.crt meshcentral-data/*-private.key meshcentral-data/*.key-old meshcentral-data/*.crt-old meshcentral-data/config.json' \
+  --prune-empty --tag-name-filter cat -- --all
+
+# Clean up
+rm -rf .git/refs/original/
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+```
+
+**After cleanup:**
+
+```bash
+# Force push to remote (coordinate with team!)
+git push origin --force --all
+git push origin --force --tags
+
+# All team members must re-clone:
+cd ..
+mv trifecta trifecta-old-delete-me
+git clone <repo-url> trifecta
+cd trifecta
+cp ../trifecta-old-delete-me/.env .env  # Copy your local config
+```
+
+#### 6. Rotate All Exposed Secrets
+
+Since the old secrets were in git history, they should be considered **compromised** and must be rotated:
+
+**A. SSL Certificates:**
+
+```bash
+# Option 1: Use Let's Encrypt (recommended)
+# Set in .env:
+LETSENCRYPT_EMAIL=your-email@example.com
+LETSENCRYPT_DOMAIN=your-domain.com
+LETSENCRYPT_PRODUCTION=true
+# Comment out or remove SSL_CERT_PATH and SSL_KEY_PATH
+# MeshCentral will auto-generate new certs
+
+# Option 2: Generate new self-signed certificates
+openssl req -x509 -newkey rsa:4096 \
+  -keyout new-key.pem -out new-cert.pem \
+  -days 365 -nodes \
+  -subj "/CN=your-domain.com"
+
+# Move to secure location
+mkdir -p ~/trifecta-certs
+mv new-cert.pem ~/trifecta-certs/cert.pem
+mv new-key.pem ~/trifecta-certs/key.pem
+chmod 600 ~/trifecta-certs/key.pem
+chmod 644 ~/trifecta-certs/cert.pem
+
+# Update .env
+echo "SSL_CERT_PATH=$HOME/trifecta-certs/cert.pem" >> .env
+echo "SSL_KEY_PATH=$HOME/trifecta-certs/key.pem" >> .env
+```
+
+**B. MeshCentral Admin Password:**
+
+```bash
+# Start MeshCentral
+docker-compose up -d
+
+# Access at https://your-domain.com
+# Login with current admin account
+# Go to: My Account → Change Password
+# Use a strong, unique password (e.g., generated by password manager)
+```
+
+**C. MeshCentral Certificates:**
+
+MeshCentral will automatically generate new certificates when you:
+1. Delete the old meshcentral-data directory (after backup!)
+2. Restart with fresh configuration
+
+```bash
+# Backup current data
+cp -r meshcentral-data meshcentral-data.backup
+
+# Remove old certificates (MeshCentral will regenerate)
+rm meshcentral-data/*-cert-*.key
+rm meshcentral-data/*-cert-*.crt
+
+# Restart
+docker-compose restart
+```
+
+**D. API Tokens (if any):**
+
+If you've created any API tokens or login tokens in MeshCentral:
+1. Login to MeshCentral admin
+2. Go to each user's settings
+3. Regenerate/revoke old tokens
+4. Create new tokens if needed
+
+### Medium Priority (This Month)
+
+#### 7. Update Railway Environment Variables
+
+Ensure Railway uses the new secrets:
+
+1. Go to Railway dashboard → Your project
+2. Navigate to Variables tab
+3. Update:
+   - `HOSTNAME`
+   - `LETSENCRYPT_EMAIL`
+   - Any other changed values
+4. Redeploy if needed
+
+#### 8. Update GitHub Secrets
+
+If using GitHub Actions:
+
+1. Go to GitHub → Settings → Secrets and variables → Actions
+2. Update:
+   - `HOSTNAME`
+   - `LETSENCRYPT_EMAIL`
+   - `SSL_CERTIFICATE` (if using custom certs)
+   - `SSL_PRIVATE_KEY` (if using custom certs)
+
+#### 9. Run Security Scans
+
+```bash
+# Run the test script again
+./test-secret-rotation.sh
+
+# Should now PASS all tests
+
+# Run TruffleHog to verify history is clean
+pip install trufflehog
+trufflehog git file://. --json --no-update
+# Should find no secrets
+
+# Run npm audit
+npm audit --audit-level=high
+
+# If using GitHub Actions, trigger security scan
+gh workflow run security-scan.yml
+```
+
+### Ongoing Maintenance
+
+#### 10. Document What Changed
+
+Create a record of what was rotated:
+
+```bash
+# Create rotation log
+cat > SECRET_ROTATION_LOG.md <<EOF
+# Secret Rotation Log
+
+## Date: $(date +%Y-%m-%d)
+## Reason: Secrets found in git history
+
+### Secrets Rotated:
+- [ ] SSL Certificate (cert.pem)
+- [ ] SSL Private Key (key.pem)
+- [ ] MeshCentral server certificates
+- [ ] MeshCentral admin password
+- [ ] Railway environment variables
+- [ ] GitHub secrets
+
+### Actions Taken:
+1. Cleaned git history
+2. Force pushed cleaned history
+3. Team members re-cloned repository
+4. Generated new certificates
+5. Updated admin password
+6. Updated deployment secrets
+
+### Verification:
+- [ ] test-secret-rotation.sh passes
+- [ ] TruffleHog scan clean
+- [ ] Application works with new secrets
+- [ ] Railway deployment working
+- [ ] GitHub Actions working
+
+### Team Notified:
+- [ ] Email sent to team
+- [ ] Slack/Discord notification
+- [ ] README updated with rotation date
+EOF
+
+# DO NOT commit this file with real secret values!
+# Keep it in a secure location outside the repo
+```
+
+#### 11. Team Communication
+
+Send a message to all team members:
+
+```
+Subject: URGENT - Repository Secret Rotation Required
+
+Team,
+
+We've cleaned secrets from our git repository history. Action required:
+
+1. Push all uncommitted work immediately
+2. After [SPECIFIC TIME/DATE], re-clone the repository:
+   - cd ..
+   - mv trifecta trifecta-old
+   - git clone <repo-url> trifecta
+   - cd trifecta
+   - cp ../trifecta-old/.env .env  (if you have local changes)
+
+3. All old certificates/keys have been rotated
+4. Update your .env file with new values (if needed)
+
+DO NOT pull or fetch from old clone - you must re-clone!
+
+Questions? Contact [ADMIN]
+```
+
+## Verification Checklist
+
+After completing all actions, verify:
+
+- [ ] `./test-secret-rotation.sh` passes all tests
+- [ ] `git log -p --all | grep "BEGIN.*PRIVATE KEY"` returns nothing
+- [ ] Fresh clone works with new .env
+- [ ] Docker deployment works: `docker-compose up -d`
+- [ ] Application accessible at https://your-domain.com
+- [ ] Railway deployment working (if applicable)
+- [ ] GitHub Actions workflows passing
+- [ ] Pre-commit hook installed and working
+- [ ] All team members have re-cloned
+- [ ] Old certificates no longer work
+- [ ] New admin password works
+
+## Timeline
+
+**Day 1 (TODAY):**
+- ✅ Update .gitignore
+- Remove config.json from tracking
+- Install pre-commit hook
+- Create local .env file
+
+**Day 2-3:**
+- Coordinate with team
+- Clean git history
+- Force push cleaned history
+- Team re-clones repository
+
+**Week 1:**
+- Rotate all secrets
+- Update Railway/GitHub secrets
+- Verify all deployments work
+
+**Week 2:**
+- Run comprehensive security scans
+- Verify test suite passes
+- Document what changed
+
+## Questions?
+
+Refer to:
+- [TEST_SECRET_ROTATION.md](TEST_SECRET_ROTATION.md) - Testing guide
+- [MIGRATION.md](MIGRATION.md) - Migration guide
+- [SECURITY.md](SECURITY.md) - Security best practices

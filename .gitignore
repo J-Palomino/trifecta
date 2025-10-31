@@ -14,14 +14,17 @@ node_modules
 *.p12
 *.pfx
 
-# MeshCentral data (contains generated keys)
+# MeshCentral data (contains generated keys and config)
 meshcentral-data/*.key
 meshcentral-data/*-private.key
+meshcentral-data/*.key-old
+meshcentral-data/*.crt-old
 meshcentral-data/root-cert-private.key
 meshcentral-data/agentserver-cert-private.key
 meshcentral-data/mpsserver-cert-private.key
 meshcentral-data/webserver-cert-private.key
 meshcentral-data/codesign-cert-private.key
+meshcentral-data/config.json
 
 # Backups (may contain sensitive data)
 meshcentral-backups/
