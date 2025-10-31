@@ -1,0 +1,28 @@
+# Production Docker Compose configuration
+# Use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  app:
+    # Override volume mounts for production to reduce exposure
+    volumes:
+      # Mount only necessary files and directories
+      - ./package.json:/app/package.json:ro
+      - ./package-lock.json:/app/package-lock.json:ro
+      - ./index.js:/app/index.js:ro
+      - ./nginx.conf:/app/nginx.conf:ro
+      - ./meshcentral-data:/app/meshcentral-data
+      # Exclude: .env, .git, certificates, documentation, etc.
+    
+    # Production environment overrides
+    environment:
+      NODE_ENV: production
+    
+    # Production-specific settings
+    restart: always
+    
+    # Logging configuration for production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
