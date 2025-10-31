@@ -104,28 +104,29 @@ jobs:
           HOSTNAME: ${{ secrets.HOSTNAME }}
           LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
         run: |
-          ssh -o StrictHostKeyChecking=no "$DEPLOY_USER@$DEPLOY_HOST" << 'ENDSSH'
-            cd "$DEPLOY_PATH"
+          ssh -o StrictHostKeyChecking=no "$DEPLOY_USER@$DEPLOY_HOST" \
+            "HOSTNAME='$HOSTNAME' LETSENCRYPT_EMAIL='$LETSENCRYPT_EMAIL' DEPLOY_PATH='$DEPLOY_PATH' bash -s" << 'ENDSSH'
+            cd "$DEPLOY_PATH" || exit 1
             git pull origin main
             
-            # Create .env file with secrets
-            cat > .env << 'ENVEOF'
+            # Create .env file with secrets from environment variables
+            cat > .env << EOF
           NODE_ENV=production
-          HOSTNAME='$HOSTNAME'
+          HOSTNAME=${HOSTNAME}
           PORT=443
           REDIRECT_PORT=80
-          MESHCENTRAL_CERT_NAME='$HOSTNAME'
+          MESHCENTRAL_CERT_NAME=${HOSTNAME}
           MESHCENTRAL_PORT=443
           MESHCENTRAL_REDIRECT_PORT=80
-          LETSENCRYPT_EMAIL='$LETSENCRYPT_EMAIL'
-          LETSENCRYPT_DOMAIN='$HOSTNAME'
+          LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+          LETSENCRYPT_DOMAIN=${HOSTNAME}
           LETSENCRYPT_PRODUCTION=true
           ALLOW_NEW_ACCOUNTS=false
           ENABLE_IPKVM=false
           ALLOW_LOGIN_TOKEN=true
           WAN_ONLY=true
           PYTHONUNBUFFERED=1
-          ENVEOF
+          EOF
             
             # Generate configuration
             chmod +x generate-config.sh
@@ -166,6 +167,8 @@ jobs:
         run: sleep 30
       
       - name: Health check
+        env:
+          HOSTNAME: ${{ secrets.HOSTNAME }}
         run: |
           echo "Checking service health..."
           
