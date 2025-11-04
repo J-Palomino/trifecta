@@ -14,7 +14,33 @@
       "title": "TreeTee",
       "newAccounts": ${ALLOW_NEW_ACCOUNTS},
       "ipkvm": ${ENABLE_IPKVM},
-      "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}"
+      "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}",
+      "preConfiguredScripts": [
+        {
+          "name": "Install Goose AI (Linux)",
+          "cmd": "curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash && echo 'Goose installed successfully. Run: goose configure'",
+          "type": "sh",
+          "runas": "user"
+        },
+        {
+          "name": "Install Goose AI (macOS)",
+          "cmd": "curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash && echo 'Goose installed successfully. Run: goose configure'",
+          "type": "sh",
+          "runas": "user"
+        },
+        {
+          "name": "Check Goose Status (Linux/macOS)",
+          "cmd": "if command -v goose &> /dev/null; then goose --version && echo 'Config:' && ls -la ~/.config/goose/profiles.yaml 2>/dev/null && echo 'Goose is configured' || echo 'Run: goose configure'; else echo 'Goose not installed'; fi",
+          "type": "sh",
+          "runas": "user"
+        },
+        {
+          "name": "Start Goose Chat (Linux/macOS)",
+          "cmd": "if command -v goose &> /dev/null; then echo 'Starting Goose AI...' && goose session start; else echo 'Goose not installed. Run Install Goose AI first.'; fi",
+          "type": "sh",
+          "runas": "user"
+        }
+      ]
     }
   },
   "letsencrypt": {
