@@ -3,7 +3,7 @@
     "cert": "${MESHCENTRAL_CERT_NAME}",
     "port": ${MESHCENTRAL_PORT},
     "redirPort": ${MESHCENTRAL_REDIRECT_PORT},
-    "tlsOffload": false,
+    "tlsOffload": true,
     "allowLoginToken": ${ALLOW_LOGIN_TOKEN},
     "WANonly": ${WAN_ONLY},
     "exactPort": true,
@@ -13,7 +13,8 @@
     "": {
       "title": "TreeTee",
       "newAccounts": ${ALLOW_NEW_ACCOUNTS},
-      "ipkvm": ${ENABLE_IPKVM}
+      "ipkvm": ${ENABLE_IPKVM},
+      "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}"
     }
   },
   "letsencrypt": {
