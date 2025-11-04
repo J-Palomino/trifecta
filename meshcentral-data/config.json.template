@@ -3,7 +3,7 @@
     "cert": "${MESHCENTRAL_CERT_NAME}",
     "port": ${MESHCENTRAL_PORT},
     "redirPort": ${MESHCENTRAL_REDIRECT_PORT},
-    "tlsOffload": true,
+    "tlsOffload": false,
     "allowLoginToken": ${ALLOW_LOGIN_TOKEN},
     "WANonly": ${WAN_ONLY},
     "exactPort": true,
