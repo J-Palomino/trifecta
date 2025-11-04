@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "=== Goose CLI Installation for macOS (via TreeTee) ==="
+echo "=== Goose CLI Installation for macOS (via DaisyChain) ==="
 echo ""
 echo "This script installs Goose AI coding assistant on macOS."
 echo "Goose provides AI-powered coding assistance directly in your terminal."

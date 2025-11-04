@@ -1,7 +1,7 @@
-# Goose CLI Installation for Windows (via TreeTee)
+# Goose CLI Installation for Windows (via DaisyChain)
 # PowerShell script for installing Goose AI coding assistant
 
-Write-Host "=== Goose CLI Installation for Windows (via TreeTee) ===" -ForegroundColor Cyan
+Write-Host "=== Goose CLI Installation for Windows (via DaisyChain) ===" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "This script installs Goose AI coding assistant on Windows."
 Write-Host "Goose provides AI-powered coding assistance directly in your terminal."

@@ -1,4 +1,4 @@
-# TreeTee UI Customization Guide
+# DaisyChain UI Customization Guide
 
 MeshCentral provides extensive built-in UI customization options. You can customize colors, logos, text, and even completely rebrand the interface.
 
@@ -12,7 +12,7 @@ Add these options to the `domains` section:
 {
   "domains": {
     "": {
-      "title": "TreeTee",
+      "title": "DaisyChain",
       "title2": "AI Agent Control Platform",
       "newAccounts": false,
       "ipkvm": false,
@@ -21,7 +21,7 @@ Add these options to the `domains` section:
       // UI Customization Options:
       "titlePicture": "title-logo.png",
       "loginPicture": "login-logo.png",
-      "welcomeText": "Welcome to TreeTee - Secure AI Agent Monitoring",
+      "welcomeText": "Welcome to DaisyChain - Secure AI Agent Monitoring",
       "welcomePicture": "welcome-image.png",
       "footer": "<a href='https://yourdomain.com'>Your Company</a>",
       "nightMode": 1
@@ -34,7 +34,7 @@ Add these options to the `domains` section:
 
 | Option | Type | Description | Example |
 |--------|------|-------------|---------|
-| `title` | String | Main title (top left) | `"TreeTee"` |
+| `title` | String | Main title (top left) | `"DaisyChain"` |
 | `title2` | String | Subtitle | `"AI Agent Platform"` |
 | `titlePicture` | String | Logo image (450x66 PNG) | `"logo.png"` |
 | `loginPicture` | String | Login page logo | `"login-logo.png"` |
@@ -82,58 +82,68 @@ meshcentral-web/public/images/
 Create `meshcentral-web/public/styles/custom.css`:
 
 ```css
-/* Custom CSS for TreeTee Branding */
+/* Custom CSS for DaisyChain Branding */
 
 /* Main background color */
 body {
-    background-color: #1a1a1a;
+    background-color: #E7DECA;
+    color: #333333;
 }
 
 /* Top bar styling */
 #topbar {
-    background-color: #2c3e50;
-    border-bottom: 2px solid #3498db;
+    background-color: #7AA7B5;
+    border-bottom: 2px solid #F5C94C;
 }
 
 /* Button colors */
 .btn-primary {
-    background-color: #3498db;
-    border-color: #2980b9;
+    background-color: #F5C94C;
+    border-color: #F5C94C;
+    color: #333333;
 }
 
 .btn-primary:hover {
-    background-color: #2980b9;
+    background-color: #7AA7B5;
+    border-color: #7AA7B5;
+    color: #FFFFFF;
 }
 
 /* Link colors */
 a {
-    color: #3498db;
+    color: #7AA7B5;
 }
 
 a:hover {
-    color: #5dade2;
+    color: #F5C94C;
+}
+
+/* Highlights and selections */
+::selection {
+    background-color: #F5C94C;
+    color: #333333;
 }
 
 /* Login page styling */
 #loginpanel {
-    background-color: rgba(44, 62, 80, 0.95);
-    border: 1px solid #3498db;
+    background-color: rgba(231, 222, 202, 0.95);
+    border: 2px solid #7AA7B5;
 }
 
 /* Device list styling */
 .device {
-    border-left: 3px solid #3498db;
+    border-left: 3px solid #7AA7B5;
 }
 
 .device:hover {
-    background-color: #34495e;
+    background-color: #F5C94C;
 }
 
 /* Custom branding text */
 .footer-custom {
     text-align: center;
     padding: 10px;
-    color: #7f8c8d;
+    color: #333333;
     font-size: 12px;
 }
 ```
@@ -146,13 +156,13 @@ Add custom CSS and images to config:
 {
   "domains": {
     "": {
-      "title": "TreeTee",
+      "title": "DaisyChain",
       "title2": "AI Agent Control Platform",
       "titlePicture": "title-logo.png",
       "loginPicture": "login-logo.png",
-      "welcomeText": "Welcome to TreeTee - Secure AI Agent Monitoring & Control",
+      "welcomeText": "Welcome to DaisyChain - Secure AI Agent Monitoring & Control",
       "welcomePicture": "welcome-banner.png",
-      "footer": "<div class='footer-custom'>TreeTee &copy; 2025 | <a href='https://yourdomain.com'>Your Company</a></div>",
+      "footer": "<div class='footer-custom'>DaisyChain &copy; 2025 | <a href='https://yourdomain.com'>Your Company</a></div>",
       "nightMode": 2,
       "newAccounts": false,
       "ipkvm": false,
@@ -214,10 +224,10 @@ Add to config.json:
   "domains": {
     "": {
       "agentCustomization": {
-        "displayName": "TreeTee Agent",
-        "description": "TreeTee AI Agent Monitor",
+        "displayName": "DaisyChain Agent",
+        "description": "DaisyChain AI Agent Monitor",
         "companyName": "Your Company",
-        "serviceName": "TreeTeeAgent",
+        "serviceName": "DaisyChainAgent",
         "image": "custom-agent-icon.png"
       }
     }
@@ -253,22 +263,22 @@ Control dark/light theme:
   },
   "domains": {
     "": {
-      "title": "TreeTee",
+      "title": "DaisyChain",
       "title2": "AI Agent Monitoring Platform",
       "titlePicture": "title-logo.png",
       "loginPicture": "login-logo.png",
-      "welcomeText": "Welcome to TreeTee - The Universal Handshake Protocol for AI Agents",
+      "welcomeText": "Welcome to DaisyChain - The Universal Handshake Protocol for AI Agents",
       "welcomePicture": "welcome-banner.png",
-      "footer": "<div style='text-align:center;padding:10px;color:#888;'>TreeTee &copy; 2025 | Powered by MeshCentral | <a href='https://github.com/J-Palomino/trifecta'>GitHub</a></div>",
+      "footer": "<div style='text-align:center;padding:10px;color:#333333;'>DaisyChain &copy; 2025 | Powered by MeshCentral | <a href='https://github.com/J-Palomino/trifecta'>GitHub</a></div>",
       "nightMode": 2,
       "newAccounts": ${ALLOW_NEW_ACCOUNTS},
       "ipkvm": ${ENABLE_IPKVM},
       "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}",
       "agentCustomization": {
-        "displayName": "TreeTee Agent",
-        "description": "TreeTee AI Agent Monitor and Control",
-        "companyName": "TreeTee",
-        "serviceName": "TreeTeeAgent"
+        "displayName": "DaisyChain Agent",
+        "description": "DaisyChain AI Agent Monitor and Control",
+        "companyName": "DaisyChain",
+        "serviceName": "DaisyChainAgent"
       }
     }
   },
@@ -309,7 +319,7 @@ Control dark/light theme:
 2. **Add custom images** to `meshcentral-web/public/images/`
 3. **Regenerate config**: `./generate-config.sh`
 4. **Commit changes**: `git add . && git commit -m "UI customization"`
-5. **Deploy**: `git push && railway up --service TreeTee --detach`
+5. **Deploy**: `git push && railway up --service DaisyChain --detach`
 
 ## Testing Locally
 

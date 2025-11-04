@@ -1,12 +1,12 @@
-# Goose AI Quick Start Guide for TreeTee
+# Goose AI Quick Start Guide for DaisyChain
 
 ## What You Just Got
 
-TreeTee now has **one-click AI chat buttons** in the web interface! Install Goose AI assistant on any connected agent with a single click.
+DaisyChain now has **one-click AI chat buttons** in the web interface! Install Goose AI assistant on any connected agent with a single click.
 
 ## How to Use (3 Easy Steps)
 
-### Step 1: Open TreeTee
+### Step 1: Open DaisyChain
 Go to https://tee.up.railway.app and login
 
 ### Step 2: Click the Button
@@ -42,7 +42,7 @@ goose session start
 ```
 Scenario: You want AI help debugging a script on a remote server
 
-1. Login to TreeTee
+1. Login to DaisyChain
 2. Click on "dev-server-01"
 3. Actions → Run Commands → "Install Goose AI (Linux)"
 4. Wait for "installed successfully" message
@@ -95,7 +95,7 @@ A: Check ONE_BUTTON_GOOSE_INSTALL.md for troubleshooting steps.
 
 ## Next Steps
 
-1. ✅ Buttons are now in TreeTee (just deployed!)
+1. ✅ Buttons are now in DaisyChain (just deployed!)
 2. Pick an agent to test on
 3. Click "Install Goose AI"
 4. Configure with your API key

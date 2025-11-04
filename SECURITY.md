@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the security best practices and guidelines for the TreeTee platform. Following these practices will help ensure your deployment remains secure.
+This document outlines the security best practices and guidelines for the DaisyChain platform. Following these practices will help ensure your deployment remains secure.
 
 ## Reporting Security Vulnerabilities
 

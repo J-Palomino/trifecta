@@ -1,14 +1,14 @@
-# TreeTee: AI Agent Monitoring & Control Platform
+# DaisyChain: AI Agent Monitoring & Control Platform
 
 ![AI Agent at Work](https://media1.giphy.com/media/mTxnhJyiVYTUA/giphy_s.gif?cid=6c09b952snrxtrklyp25g9h06jz0y0qqw20l3neyh21hp41n&ep=v1_gifs_search&rid=giphy_s.gif&ct=g)
 
 **The Universal Handshake Protocol: Bridging AI Agents, Virtual Machines, and Human Control**
 
-TreeTee is a comprehensive platform that allows AI agents to use computers exactly as humans do, providing secure monitoring, tracing, and remote control capabilities for both virtual and physical machines.
+DaisyChain is a comprehensive platform that allows AI agents to use computers exactly as humans do, providing secure monitoring, tracing, and remote control capabilities for both virtual and physical machines.
 
 ## 🚀 Overview
 
-TreeTee bridges the gap between AI agents and computer systems by creating a secure monitoring environment where:
+DaisyChain bridges the gap between AI agents and computer systems by creating a secure monitoring environment where:
 
 - AI agents can control virtual and physical machines via VNC/RDP
 - Humans can observe agent actions in real-time
@@ -19,7 +19,7 @@ TreeTee bridges the gap between AI agents and computer systems by creating a sec
 
 ## 🔒 Security & Verification
 
-TreeTee operates completely in the cloud with strong security guarantees:
+DaisyChain operates completely in the cloud with strong security guarantees:
 
 - All components are containerized for consistent deployment
 - Runs in verified TEEs (Trusted Execution Environments)
@@ -31,7 +31,7 @@ TreeTee operates completely in the cloud with strong security guarantees:
 
 ## 🧩 Core Components
 
-### 1. TreeTee VNC Monitoring Tool and Agent Deployer
+### 1. DaisyChain VNC Monitoring Tool and Agent Deployer
 The central monitoring platform that allows you to:
 - Deploy and manage AI agents
 - Monitor agent activities in real-time
@@ -49,7 +49,7 @@ The virtual machine and API used by AI agents to:
 
 ## 🔌 Integration with Open Source Tools
 
-TreeTee leverages battle-tested open source technologies:
+DaisyChain leverages battle-tested open source technologies:
 
 - **MeshCentral**: For secure remote device management
 - **Goose**: For virtualization and machine control
@@ -57,7 +57,7 @@ TreeTee leverages battle-tested open source technologies:
 
 ## 🚪 Access Control & Sharing
 
-TreeTee provides granular control over agent capabilities:
+DaisyChain provides granular control over agent capabilities:
 - Programmatically grant temporary access to specific agent capabilities
 - Share or sell access to your agents with fine-grained permissions
 - Control desktop viewing, interaction, file sharing, terminal access, and messaging
@@ -68,7 +68,7 @@ TreeTee provides granular control over agent capabilities:
 
 ### Quick Start with Docker
 
-1. Deploy TreeTee monitoring platform:
+1. Deploy DaisyChain monitoring platform:
 
 ```bash
 # Clone the repository
@@ -135,7 +135,7 @@ docker run -d -p 3000:3000 ghcr.io/j-palomino/openai-cua-sample-app:latest
 
 ## 🔐 Security
 
-TreeTee takes security seriously. This repository follows security best practices:
+DaisyChain takes security seriously. This repository follows security best practices:
 
 - **No hardcoded secrets** - All sensitive data uses environment variables
 - **Certificate management** - SSL/TLS certificates are never committed to version control

@@ -2,7 +2,7 @@
 
 ## macOS Agent Support
 
-TreeTee/MeshCentral provides **three macOS agent binaries**:
+DaisyChain/MeshCentral provides **three macOS agent binaries**:
 
 | Binary | Size | Architecture | Use Case |
 |--------|------|--------------|----------|

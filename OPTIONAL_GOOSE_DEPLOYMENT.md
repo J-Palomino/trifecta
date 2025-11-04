@@ -1,16 +1,16 @@
-# Optional Goose AI Deployment for TreeTee Agents
+# Optional Goose AI Deployment for DaisyChain Agents
 
 ## Overview
 
 **Goose is completely optional and separate from MeshCentral agent installation.**
 
-This guide covers deploying Goose AI assistant to agents **after** they are successfully connected to TreeTee. Goose installation does not interfere with or block MeshCentral agent functionality.
+This guide covers deploying Goose AI assistant to agents **after** they are successfully connected to DaisyChain. Goose installation does not interfere with or block MeshCentral agent functionality.
 
 ## Installation Flow
 
 ```
 1. Install MeshCentral Agent   ✓ (Core requirement - must complete)
-   └─> Agent connects to TreeTee
+   └─> Agent connects to DaisyChain
    └─> Agent appears in web UI
    └─> Agent is fully functional
 
@@ -23,7 +23,7 @@ This guide covers deploying Goose AI assistant to agents **after** they are succ
 ## When to Install Goose
 
 Install Goose on agents when:
-- Agent is already connected and working in TreeTee
+- Agent is already connected and working in DaisyChain
 - You want AI coding assistance on that machine
 - The agent is used for development work
 - You want to experiment with AI-assisted debugging
@@ -38,7 +38,7 @@ Install Goose on agents when:
 
 ### Method 1: Manual Installation (Recommended for Testing)
 
-**Step 1:** Verify agent is connected in TreeTee web UI
+**Step 1:** Verify agent is connected in DaisyChain web UI
 
 **Step 2:** Open Terminal for that agent in MeshCentral
 
@@ -96,7 +96,7 @@ Create a deployment script that runs on multiple agents:
 #!/bin/bash
 # deploy-goose-to-agents.sh
 
-# This script assumes agents are already connected to TreeTee
+# This script assumes agents are already connected to DaisyChain
 # and you want to bulk-install Goose
 
 AGENTS=("agent1.example.com" "agent2.example.com" "agent3.example.com")
@@ -228,7 +228,7 @@ Goose installation:
 ## Best Practices
 
 1. **Always install MeshAgent first**
-   - Verify agent connectivity in TreeTee UI
+   - Verify agent connectivity in DaisyChain UI
    - Confirm agent can execute commands
    - Test terminal access works
 
@@ -252,7 +252,7 @@ Goose installation:
 ### Goose Installation Fails
 
 **This does NOT affect MeshAgent:**
-- Agent remains connected to TreeTee
+- Agent remains connected to DaisyChain
 - All MeshCentral functions still work
 - Simply retry Goose installation later
 
@@ -291,7 +291,7 @@ goose configure
 ## Example Deployment Workflow
 
 ```bash
-# 1. Verify agent is connected (check TreeTee web UI)
+# 1. Verify agent is connected (check DaisyChain web UI)
 # Agent "dev-server-01" is online and responsive
 
 # 2. Open Terminal for agent in MeshCentral
@@ -326,4 +326,4 @@ echo "dev-server-01: Goose installed, Anthropic provider" >> goose-deployments.t
 
 ---
 
-**TreeTee agents work perfectly without Goose. Goose is just a bonus AI feature.**
+**DaisyChain agents work perfectly without Goose. Goose is just a bonus AI feature.**

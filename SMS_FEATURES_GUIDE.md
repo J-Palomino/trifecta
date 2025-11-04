@@ -1,8 +1,8 @@
-# TreeTee SMS Features Guide
+# DaisyChain SMS Features Guide
 
 ## Overview
 
-TreeTee (MeshCentral) provides comprehensive SMS integration for two-factor authentication, user messaging, and phone number validation. You can use commercial SMS gateways (Twilio, Plivo, Telnyx) or configure a custom SMS endpoint.
+DaisyChain (MeshCentral) provides comprehensive SMS integration for two-factor authentication, user messaging, and phone number validation. You can use commercial SMS gateways (Twilio, Plivo, Telnyx) or configure a custom SMS endpoint.
 
 ## Available SMS Features
 
@@ -146,7 +146,7 @@ TWILIO_FROM=+1234567890
 - Example: Chinese characters become `%E4%B8%AD%E6%96%87`
 - Your gateway must decode these properly
 
-## Configuration in TreeTee
+## Configuration in DaisyChain
 
 ### Step 1: Choose Your SMS Provider
 
@@ -191,7 +191,7 @@ Add the SMS configuration section to `meshcentral-data/config.json.template`:
   },
   "domains": {
     "": {
-      "title": "TreeTee",
+      "title": "DaisyChain",
       "newAccounts": ${ALLOW_NEW_ACCOUNTS},
       "ipkvm": ${ENABLE_IPKVM},
       "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}"
@@ -224,12 +224,12 @@ git commit -m "Add SMS support with Twilio integration"
 git push origin main
 
 # Or use Railway CLI
-railway up --service TreeTee
+railway up --service DaisyChain
 ```
 
 ### Step 6: Test SMS Configuration
 
-1. **Login to TreeTee** at https://tee.up.railway.app
+1. **Login to DaisyChain** at https://tee.up.railway.app
 2. Navigate to **My Server** → **Console**
 3. Type: `sms +15551234567 Test message`
 4. Verify the test SMS is received
@@ -248,7 +248,7 @@ railway up --service TreeTee
 
 ### For Users:
 
-1. Login to TreeTee
+1. Login to DaisyChain
 2. Go to **My Account** → **Phone Number**
 3. Enter your phone number (with country code, e.g., +1234567890)
 4. Click **"Send Verification Code"**
@@ -294,7 +294,7 @@ The repository's pre-commit hook scans for:
 ### Railway Environment Variables
 
 Set sensitive values in Railway dashboard:
-1. Go to Railway project → TreeTee service
+1. Go to Railway project → DaisyChain service
 2. Click **"Variables"** tab
 3. Add: `TWILIO_SID`, `TWILIO_AUTH`, `TWILIO_FROM`
 4. These are encrypted and never exposed in logs
@@ -330,7 +330,7 @@ Set sensitive values in Railway dashboard:
 **Check Configuration:**
 ```bash
 # View SMS config (credentials will be masked in logs)
-railway logs --service TreeTee | grep -i sms
+railway logs --service DaisyChain | grep -i sms
 
 # Test from console
 # In MeshCentral web UI: My Server → Console

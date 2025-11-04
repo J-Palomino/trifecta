@@ -1,8 +1,8 @@
-# Goose AI Assistant Integration with TreeTee
+# Goose AI Assistant Integration with DaisyChain
 
 ## Overview
 
-This guide explains how to integrate Goose AI coding assistant with TreeTee/MeshCentral, allowing you to chat with AI assistants on your monitored machines. Goose provides on-machine AI capabilities for coding assistance, debugging, and automation.
+This guide explains how to integrate Goose AI coding assistant with DaisyChain/MeshCentral, allowing you to chat with AI assistants on your monitored machines. Goose provides on-machine AI capabilities for coding assistance, debugging, and automation.
 
 ## What is Goose?
 
@@ -15,7 +15,7 @@ This guide explains how to integrate Goose AI coding assistant with TreeTee/Mesh
 
 **Best for:**
 - AI-assisted coding and debugging on remote machines
-- Automated task execution on TreeTee agents
+- Automated task execution on DaisyChain agents
 - Development work on monitored VMs
 - Quick AI consultations without leaving your agent
 
@@ -23,7 +23,7 @@ This guide explains how to integrate Goose AI coding assistant with TreeTee/Mesh
 
 ### Method 1: Automated Installation Scripts (Recommended)
 
-TreeTee provides platform-specific installation scripts:
+DaisyChain provides platform-specific installation scripts:
 
 **Linux Agents:**
 ```bash
@@ -130,7 +130,7 @@ Add custom buttons to MeshCentral for quick Goose access.
 {
   "domains": {
     "": {
-      "title": "TreeTee",
+      "title": "DaisyChain",
       "userAllowedIP": "0.0.0.0/0",
       "customui": {
         "deviceButtons": [
@@ -216,7 +216,7 @@ mkdir -p ~/.config/goose
 curl -o ~/.config/goose/profiles.yaml https://your-config-server.com/shared-goose-profile.yaml
 
 # Replace environment variables with actual API keys
-# (Use TreeTee/MeshCentral environment variable injection)
+# (Use DaisyChain/MeshCentral environment variable injection)
 export ANTHROPIC_API_KEY="your-api-key-here"
 envsubst < ~/.config/goose/profiles.yaml > ~/.config/goose/profiles.yaml.tmp
 mv ~/.config/goose/profiles.yaml.tmp ~/.config/goose/profiles.yaml
@@ -229,7 +229,7 @@ goose --version
 - Upload `deploy-goose-config.sh` to agents via Files tab
 - Run via Terminal: `bash deploy-goose-config.sh`
 
-### Using TreeTee Environment Variables
+### Using DaisyChain Environment Variables
 
 Store API keys as environment variables on agents:
 
@@ -283,7 +283,7 @@ goose configure
 # No API key needed
 ```
 
-## Example Goose Use Cases on TreeTee Agents
+## Example Goose Use Cases on DaisyChain Agents
 
 ### Use Case 1: Debug a Script on Remote Agent
 
@@ -486,4 +486,4 @@ Typical usage (per agent per month):
 
 ---
 
-**TreeTee + Goose = AI-powered remote development at scale**
+**DaisyChain + Goose = AI-powered remote development at scale**

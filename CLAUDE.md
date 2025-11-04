@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-TreeTee is an AI agent monitoring and control platform that bridges AI agents, virtual machines, and human control. It enables AI agents to control computers via VNC/RDP while providing secure monitoring in Trusted Execution Environments (TEEs).
+DaisyChain is an AI agent monitoring and control platform that bridges AI agents, virtual machines, and human control. It enables AI agents to control computers via VNC/RDP while providing secure monitoring in Trusted Execution Environments (TEEs).
 
 **Core Components:**
 - MeshCentral-based remote device management server (npm package v1.1.42)
@@ -71,7 +71,7 @@ chmod +x .git/hooks/pre-commit
 
 ### Configuration System
 
-TreeTee uses a two-stage configuration approach:
+DaisyChain uses a two-stage configuration approach:
 
 1. **Template-based generation**: `meshcentral-data/config.json.template` contains MeshCentral config with environment variable placeholders
 2. **Environment substitution**: `generate-config.sh` or `docker-entrypoint.sh` uses `envsubst` to replace placeholders with actual values from `.env`

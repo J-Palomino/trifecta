@@ -28,14 +28,14 @@ This prevents `envsubst` from touching bash logic like:
 ### Step 1: Wait for Deployment
 ```bash
 # Check Railway logs
-railway logs --service TreeTee 2>&1 | tail -20
+railway logs --service DaisyChain 2>&1 | tail -20
 
 # Look for:
 # - "Configuration generated successfully!"
 # - "MeshCentral HTTPS server running"
 ```
 
-### Step 2: Login to TreeTee
+### Step 2: Login to DaisyChain
 1. Go to https://tee.up.railway.app
 2. Login with your credentials
 3. You should see your connected agents
@@ -94,17 +94,17 @@ railway logs --service TreeTee 2>&1 | tail -20
 **Verification steps:**
 ```bash
 # Check Railway deployment status
-railway status --service TreeTee
+railway status --service DaisyChain
 
 # View recent logs
-railway logs --service TreeTee 2>&1 | grep -E "(Config|preConfigured|Running)" | tail -20
+railway logs --service DaisyChain 2>&1 | grep -E "(Config|preConfigured|Running)" | tail -20
 ```
 
 ### Config Not Generated Correctly
 
 **Check Railway environment variables:**
 ```bash
-railway variables --service TreeTee
+railway variables --service DaisyChain
 
 # Should have:
 # MESHCENTRAL_CERT_NAME=tee.up.railway.app
@@ -122,7 +122,7 @@ Configuration generated successfully!
 
 ## Next Steps After Deployment
 
-1. **Verify buttons appear** in TreeTee web UI
+1. **Verify buttons appear** in DaisyChain web UI
 2. **Test installation** on a connected agent
 3. **Configure Goose** with your AI provider:
    ```bash
@@ -161,4 +161,4 @@ If buttons still don't appear after 10 minutes:
 
 ---
 
-**The fix is deployed. Goose buttons should appear in TreeTee within 5 minutes!**
+**The fix is deployed. Goose buttons should appear in DaisyChain within 5 minutes!**

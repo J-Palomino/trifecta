@@ -1,6 +1,6 @@
 # Security Quick Start Guide
 
-**5-minute security setup for TreeTee**
+**5-minute security setup for DaisyChain**
 
 ## New Developer Setup
 

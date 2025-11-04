@@ -15,7 +15,7 @@ MeshCentral dynamically generates the .pkg installer with your specific mesh ID 
 
 **Steps:**
 
-1. **Login to TreeTee** at https://tee.up.railway.app
+1. **Login to DaisyChain** at https://tee.up.railway.app
 2. Navigate to **My Account** → **Device Groups**
 3. Click **"Install"** next to your device group
 4. Select **"Apple macOS"** tab

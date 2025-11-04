@@ -2,7 +2,7 @@
 
 ## Overview
 
-TreeTee now includes **one-click Goose AI installation buttons** in the MeshCentral web interface. No terminal commands required - just click a button!
+DaisyChain now includes **one-click Goose AI installation buttons** in the MeshCentral web interface. No terminal commands required - just click a button!
 
 ## How It Works
 
@@ -34,9 +34,9 @@ Pre-configured scripts appear in the MeshCentral device interface under **Action
 
 ## Step-by-Step: First Time Setup
 
-### Step 1: Access Device in TreeTee
+### Step 1: Access Device in DaisyChain
 
-1. Login to TreeTee at https://tee.up.railway.app
+1. Login to DaisyChain at https://tee.up.railway.app
 2. Navigate to **My Devices**
 3. Click on the device where you want Goose
 
@@ -89,7 +89,7 @@ After installation, you need to configure Goose with an AI provider:
 ### Where to Find Them
 
 **Method 1: Actions Menu**
-1. Click device in TreeTee
+1. Click device in DaisyChain
 2. Click **"Actions"** button at top
 3. Select **"Run Commands"**
 4. Choose from Goose scripts
@@ -124,7 +124,7 @@ Done!
 ### Scenario: Installing Goose on a Development Server
 
 ```
-1. [User] Click "dev-server-01" in TreeTee
+1. [User] Click "dev-server-01" in DaisyChain
 2. [User] Actions → Run Commands → "Install Goose AI (Linux)"
 3. [System] Downloads and installs Goose CLI
 4. [System] Shows: "Goose installed successfully. Run: goose configure"
@@ -205,7 +205,7 @@ fi
 ./generate-config.sh
 git add meshcentral-data/config.json
 git commit -m "Regenerate config with Goose buttons"
-railway up --service TreeTee
+railway up --service DaisyChain
 ```
 
 ### Installation Fails
@@ -340,9 +340,9 @@ After adding scripts:
 1. Update config.json.template with new scripts
 2. Run: ./generate-config.sh
 3. Commit: git add meshcentral-data/config.json.template
-4. Deploy: railway up --service TreeTee
+4. Deploy: railway up --service DaisyChain
 5. Wait for deployment
-6. Login to TreeTee
+6. Login to DaisyChain
 7. Navigate to device
 8. Click Actions → Run Commands
 9. See new buttons!
@@ -369,7 +369,7 @@ After adding scripts:
 
 - **Goose Documentation**: https://block.github.io/goose/
 - **MeshCentral Scripts**: https://ylianst.github.io/MeshCentral/meshcentral/config/
-- **TreeTee Goose Guide**: GOOSE_INTEGRATION_GUIDE.md
+- **DaisyChain Goose Guide**: GOOSE_INTEGRATION_GUIDE.md
 - **Optional Deployment**: OPTIONAL_GOOSE_DEPLOYMENT.md
 
 ---

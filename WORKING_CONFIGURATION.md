@@ -1,11 +1,11 @@
-# Working TreeTee Configuration
+# Working DaisyChain Configuration
 
 **Date**: 2025-11-04
 **Status**: ✅ WORKING - Agents connecting successfully
 
 ## Summary
 
-TreeTee is successfully deployed on Railway with Linux agents connecting properly. The key to WAN mode was adding `certUrl` to the domain configuration.
+DaisyChain is successfully deployed on Railway with Linux agents connecting properly. The key to WAN mode was adding `certUrl` to the domain configuration.
 
 ## Working Configuration
 
@@ -60,7 +60,7 @@ PYTHONUNBUFFERED=1
   },
   "domains": {
     "": {
-      "title": "TreeTee",
+      "title": "DaisyChain",
       "newAccounts": ${ALLOW_NEW_ACCOUNTS},
       "ipkvm": ${ENABLE_IPKVM},
       "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}"
@@ -242,7 +242,7 @@ git push origin main
 
 ### 3. Deploy to Railway
 ```bash
-railway up --service TreeTee --detach
+railway up --service DaisyChain --detach
 ```
 
 ### 4. Verify Deployment
@@ -251,7 +251,7 @@ railway up --service TreeTee --detach
 curl -I https://tee.up.railway.app
 
 # Check logs
-railway logs --service TreeTee
+railway logs --service DaisyChain
 ```
 
 ## Performance Notes
@@ -280,7 +280,7 @@ sudo journalctl -u meshagent -n 50 --no-pager
 sudo netstat -tnp | grep meshagent
 
 # On Railway:
-railway logs --service TreeTee
+railway logs --service DaisyChain
 curl -I https://tee.up.railway.app
 
 # Local Docker test:

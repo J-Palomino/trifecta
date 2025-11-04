@@ -1,7 +1,7 @@
 # Example GitHub Actions workflow for secure deployment
 # Copy this file to deploy.yml and configure your secrets in GitHub
 
-name: Deploy TreeTee
+name: Deploy DaisyChain
 
 on:
   push:

@@ -11,7 +11,7 @@
   },
   "domains": {
     "": {
-      "title": "TreeTee",
+      "title": "DaisyChain",
       "newAccounts": ${ALLOW_NEW_ACCOUNTS},
       "ipkvm": ${ENABLE_IPKVM},
       "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}",

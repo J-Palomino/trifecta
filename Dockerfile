@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-venv \
+    gettext-base \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -19,6 +20,9 @@ RUN npm install meshcentral
 # Copy the rest of the application
 COPY . .
 
+# Make entrypoint script executable
+RUN chmod +x docker-entrypoint.sh
+
 # Expose ports
 EXPOSE 80 443
 
@@ -26,5 +30,5 @@ EXPOSE 80 443
 ENV NODE_ENV=production \
     PYTHONUNBUFFERED=1
 
-# Run MeshCentral directly
-CMD ["node", "./node_modules/meshcentral"] 
+# Use entrypoint script to generate config and start MeshCentral
+ENTRYPOINT ["./docker-entrypoint.sh"] 

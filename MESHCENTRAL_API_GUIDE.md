@@ -133,7 +133,7 @@ ws.on('close', () => {
 ### Getting Auth Cookie
 
 **Method 1: From Browser**
-1. Login to TreeTee web UI
+1. Login to DaisyChain web UI
 2. Open Developer Tools (F12)
 3. Go to Application → Cookies
 4. Find cookie starting with "mesh"
@@ -169,10 +169,10 @@ npm install meshctrl -g
 
 ```bash
 # Add your MeshCentral server
-meshctrl AddServer --url https://tee.up.railway.app --name TreeTee
+meshctrl AddServer --url https://tee.up.railway.app --name DaisyChain
 
 # Login with credentials
-meshctrl Login --name TreeTee --user yourUsername --pass yourPassword
+meshctrl Login --name DaisyChain --user yourUsername --pass yourPassword
 ```
 
 ### Running Commands
@@ -326,7 +326,7 @@ In `meshcentral-data/config.json.template`:
 
 ### Usage
 
-1. Login to TreeTee web UI
+1. Login to DaisyChain web UI
 2. Select device
 3. Actions → Run Commands
 4. Click script name
@@ -608,4 +608,4 @@ ws.on('message', (data) => {
 
 ---
 
-**TreeTee now supports programmatic agent control via WebSocket API, MeshCtrl CLI, Meshbook automation, and web UI buttons!**
+**DaisyChain now supports programmatic agent control via WebSocket API, MeshCtrl CLI, Meshbook automation, and web UI buttons!**
