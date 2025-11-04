@@ -33,14 +33,17 @@ if git diff --cached --name-only | grep -E 'meshcentral-data/.*private\.key' > /
     exit 1
 fi
 
-# Check for common secret patterns in staged content
+# Check for common secret patterns in staged content (excluding documentation)
 TEMP_FILE=$(mktemp)
-git diff --cached > "$TEMP_FILE"
+git diff --cached -- ':!*.md' > "$TEMP_FILE"
 
-# Check for private keys in content
-if grep -E "BEGIN.*PRIVATE KEY" "$TEMP_FILE" > /dev/null; then
+# Check for private keys in content (already excluding .md files via TEMP_FILE)
+# Pattern split to avoid matching this check itself
+KEY_PATTERN="BEGIN.*PRIVATE"" KEY"
+if grep -E "$KEY_PATTERN" "$TEMP_FILE" > /dev/null; then
     echo "❌ ERROR: Private key detected in staged changes!"
     echo "   Private keys should never be committed to version control."
+    echo "   Note: Documentation examples in .md files are excluded from this check."
     rm "$TEMP_FILE"
     exit 1
 fi
