@@ -7,6 +7,20 @@
   "deploy": {
     "healthcheckTimeout": 800,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10
+    "restartPolicyMaxRetries": 10,
+    "volumeMounts": [
+      {
+        "mountPath": "/app/meshcentral-data",
+        "volumeName": "meshcentral-data"
+      },
+      {
+        "mountPath": "/app/meshcentral-backups",
+        "volumeName": "meshcentral-backups"
+      },
+      {
+        "mountPath": "/app/meshcentral-files",
+        "volumeName": "meshcentral-files"
+      }
+    ]
   }
 } 
