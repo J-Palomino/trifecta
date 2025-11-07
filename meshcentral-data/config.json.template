@@ -7,14 +7,11 @@
     "allowLoginToken": ${ALLOW_LOGIN_TOKEN},
     "WANonly": ${WAN_ONLY},
     "exactPort": true,
-    "trustedProxy": ["0.0.0.0/0"]
-  },
-  "postgres": {
-    "host": "${POSTGRES_HOST}",
-    "user": "${POSTGRES_USER}",
-    "port": ${POSTGRES_PORT},
-    "password": "${POSTGRES_PASSWORD}",
-    "database": "${POSTGRES_DATABASE}"
+    "trustedProxy": ["0.0.0.0/0"],
+    "mongoDb": "${MONGODB_URL}",
+    "mongoDbName": "${MONGODB_NAME}",
+    "mongoDbChangeStream": true,
+    "mongoDbBulkOperations": true
   },
   "domains": {
     "": {

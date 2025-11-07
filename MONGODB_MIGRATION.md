@@ -1,6 +1,6 @@
-# DaisyChain PostgreSQL Migration Guide
+# DaisyChain MongoDB Migration Guide
 
-Complete guide for migrating DaisyChain (MeshCentral) from NeDB file-based storage to PostgreSQL database.
+Complete guide for migrating DaisyChain (MeshCentral) from NeDB file-based storage to MongoDB database.
 
 ## Table of Contents
 
@@ -17,11 +17,12 @@ Complete guide for migrating DaisyChain (MeshCentral) from NeDB file-based stora
 
 ## Overview
 
-### Why Migrate to PostgreSQL?
+### Why Migrate to MongoDB?
 
 - **Scalability**: Better performance for 100+ devices
 - **Railway Integration**: Native backup, monitoring, and management
-- **Reliability**: ACID compliance and robust backup features
+- **Native Support**: MeshCentral has excellent MongoDB support out of the box
+- **Simple Configuration**: Minimal configuration required compared to PostgreSQL
 - **DaisyChain Title Fix**: Fresh database picks up new branding immediately
 
 ### What Gets Migrated?
