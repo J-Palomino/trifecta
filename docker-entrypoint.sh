@@ -15,6 +15,13 @@ export LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@example.com}
 export LETSENCRYPT_DOMAIN=${LETSENCRYPT_DOMAIN:-${HOSTNAME:-localhost}}
 export LETSENCRYPT_PRODUCTION=${LETSENCRYPT_PRODUCTION:-false}
 
+# PostgreSQL configuration (Railway provides these via PGHOST, PGPORT, etc.)
+export POSTGRES_HOST=${POSTGRES_HOST:-${PGHOST:-}}
+export POSTGRES_PORT=${POSTGRES_PORT:-${PGPORT:-5432}}
+export POSTGRES_USER=${POSTGRES_USER:-${PGUSER:-postgres}}
+export POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-${PGPASSWORD:-}}
+export POSTGRES_DATABASE=${POSTGRES_DATABASE:-${PGDATABASE:-meshcentral}}
+
 # Generate config.json from template if template exists
 if [ -f meshcentral-data/config.json.template ]; then
     echo "Generating config.json from template..."
@@ -22,7 +29,7 @@ if [ -f meshcentral-data/config.json.template ]; then
     echo "Removing old config.json if it exists..."
     rm -f meshcentral-data/config.json
     # Use explicit variable list to avoid substituting $ in bash commands within JSON
-    envsubst '$MESHCENTRAL_CERT_NAME $MESHCENTRAL_PORT $MESHCENTRAL_REDIRECT_PORT $ALLOW_LOGIN_TOKEN $WAN_ONLY $ALLOW_NEW_ACCOUNTS $ENABLE_IPKVM $LETSENCRYPT_EMAIL $LETSENCRYPT_DOMAIN $LETSENCRYPT_PRODUCTION' \
+    envsubst '$MESHCENTRAL_CERT_NAME $MESHCENTRAL_PORT $MESHCENTRAL_REDIRECT_PORT $ALLOW_LOGIN_TOKEN $WAN_ONLY $ALLOW_NEW_ACCOUNTS $ENABLE_IPKVM $LETSENCRYPT_EMAIL $LETSENCRYPT_DOMAIN $LETSENCRYPT_PRODUCTION $POSTGRES_HOST $POSTGRES_PORT $POSTGRES_USER $POSTGRES_PASSWORD $POSTGRES_DATABASE' \
         < meshcentral-data/config.json.template > meshcentral-data/config.json
     echo "Configuration generated successfully!"
     echo "Using hostname: $MESHCENTRAL_CERT_NAME"

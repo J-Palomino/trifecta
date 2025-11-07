@@ -9,6 +9,13 @@
     "exactPort": true,
     "trustedProxy": ["0.0.0.0/0"]
   },
+  "postgres": {
+    "host": "${POSTGRES_HOST}",
+    "user": "${POSTGRES_USER}",
+    "port": ${POSTGRES_PORT},
+    "password": "${POSTGRES_PASSWORD}",
+    "database": "${POSTGRES_DATABASE}"
+  },
   "domains": {
     "": {
       "title": "DaisyChain",

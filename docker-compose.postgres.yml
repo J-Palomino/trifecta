@@ -1,0 +1,49 @@
+# Docker Compose override for local PostgreSQL testing
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.postgres.yml up -d
+#
+# SECURITY NOTE: This file contains example passwords for LOCAL TESTING ONLY
+# Never use these credentials in production. Railway provides secure credentials via environment variables.
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: daisychain-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: meshcentral_dev_pass  # LOCAL DEV ONLY - NOT FOR PRODUCTION
+      POSTGRES_DB: meshcentral
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - daisychain_network
+
+  meshcentral:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # PostgreSQL connection for local testing
+      PGHOST: postgres
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: meshcentral_dev_pass  # LOCAL DEV ONLY - NOT FOR PRODUCTION
+      PGDATABASE: meshcentral
+    networks:
+      - daisychain_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  daisychain_network:
+    driver: bridge
