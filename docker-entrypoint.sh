@@ -18,6 +18,9 @@ export LETSENCRYPT_PRODUCTION=${LETSENCRYPT_PRODUCTION:-false}
 # Generate config.json from template if template exists
 if [ -f meshcentral-data/config.json.template ]; then
     echo "Generating config.json from template..."
+    # Always regenerate config.json to pick up template changes
+    echo "Removing old config.json if it exists..."
+    rm -f meshcentral-data/config.json
     # Use explicit variable list to avoid substituting $ in bash commands within JSON
     envsubst '$MESHCENTRAL_CERT_NAME $MESHCENTRAL_PORT $MESHCENTRAL_REDIRECT_PORT $ALLOW_LOGIN_TOKEN $WAN_ONLY $ALLOW_NEW_ACCOUNTS $ENABLE_IPKVM $LETSENCRYPT_EMAIL $LETSENCRYPT_DOMAIN $LETSENCRYPT_PRODUCTION' \
         < meshcentral-data/config.json.template > meshcentral-data/config.json
