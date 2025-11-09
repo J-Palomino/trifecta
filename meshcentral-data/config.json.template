@@ -9,9 +9,7 @@
     "exactPort": true,
     "trustedProxy": ["0.0.0.0/0"],
     "mongoDb": "${MONGODB_URL}",
-    "mongoDbName": "${MONGODB_NAME}",
-    "mongoDbChangeStream": true,
-    "mongoDbBulkOperations": true
+    "mongoDbName": "${MONGODB_NAME}"
   },
   "domains": {
     "": {
