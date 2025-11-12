@@ -15,6 +15,10 @@ export LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL:-admin@example.com}
 export LETSENCRYPT_DOMAIN=${LETSENCRYPT_DOMAIN:-${HOSTNAME:-localhost}}
 export LETSENCRYPT_PRODUCTION=${LETSENCRYPT_PRODUCTION:-false}
 
+# MongoDB configuration (Railway provides these via MONGO_URL or individual vars)
+export MONGODB_URL=${MONGODB_URL:-${MONGO_URL:-mongodb://localhost:27017/meshcentral}}
+export MONGODB_NAME=${MONGODB_NAME:-${MONGO_DATABASE:-meshcentral}}
+
 # Generate config.json from template if template exists
 if [ -f meshcentral-data/config.json.template ]; then
     echo "Generating config.json from template..."
@@ -22,7 +26,7 @@ if [ -f meshcentral-data/config.json.template ]; then
     echo "Removing old config.json if it exists..."
     rm -f meshcentral-data/config.json
     # Use explicit variable list to avoid substituting $ in bash commands within JSON
-    envsubst '$MESHCENTRAL_CERT_NAME $MESHCENTRAL_PORT $MESHCENTRAL_REDIRECT_PORT $ALLOW_LOGIN_TOKEN $WAN_ONLY $ALLOW_NEW_ACCOUNTS $ENABLE_IPKVM $LETSENCRYPT_EMAIL $LETSENCRYPT_DOMAIN $LETSENCRYPT_PRODUCTION' \
+    envsubst '$MESHCENTRAL_CERT_NAME $MESHCENTRAL_PORT $MESHCENTRAL_REDIRECT_PORT $ALLOW_LOGIN_TOKEN $WAN_ONLY $ALLOW_NEW_ACCOUNTS $ENABLE_IPKVM $LETSENCRYPT_EMAIL $LETSENCRYPT_DOMAIN $LETSENCRYPT_PRODUCTION $MONGODB_URL $MONGODB_NAME' \
         < meshcentral-data/config.json.template > meshcentral-data/config.json
     echo "Configuration generated successfully!"
     echo "Using hostname: $MESHCENTRAL_CERT_NAME"
