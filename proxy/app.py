@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="DaisyChain Proxy API v2",
     description="Hybrid REST+WebSocket API for MeshCentral device control",
-    version="2.0.0"
+    version="2.0.1"
 )
 
 # CORS configuration
@@ -144,8 +144,10 @@ mesh_client = MeshCentralClient(MESHCENTRAL_BASE, MESHCENTRAL_TOKEN)
 @app.on_event("startup")
 async def startup():
     """Authenticate on startup"""
-    logger.info(f"Starting DaisyChain Proxy v2...")
+    logger.info("=" * 60)
+    logger.info(f"DaisyChain Proxy v2.0.1 (REST API + WebSocket Hybrid)")
     logger.info(f"MeshCentral URL: {MESHCENTRAL_BASE}")
+    logger.info("=" * 60)
 
     if not MESHCENTRAL_TOKEN:
         logger.error("DAISYCHAIN_TOKEN not set!")
@@ -187,7 +189,7 @@ async def root():
         "service": "DaisyChain Proxy API v2",
         "status": "running",
         "authenticated": mesh_client.authenticated,
-        "version": "2.0.0",
+        "version": "2.0.1",
         "approach": "Hybrid REST+WebSocket"
     }
 
@@ -198,7 +200,7 @@ async def health():
         "status": "healthy" if mesh_client.authenticated else "unhealthy",
         "meshcentral_url": MESHCENTRAL_BASE,
         "authenticated": mesh_client.authenticated,
-        "api_version": "2.0.0"
+        "api_version": "2.0.1"
     }
 
 @app.get("/api/devices", dependencies=[Depends(verify_api_key)])
