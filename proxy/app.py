@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="DaisyChain Web Control",
     description="Web interface for MeshCentral device management",
-    version="3.0.0"
+    version="3.0.1"
 )
 
 # Configuration
