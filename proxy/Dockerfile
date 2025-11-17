@@ -27,5 +27,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
 
 # Run the application
-# PORT environment variable is provided by Railway
-CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# The app.py __main__ block handles PORT environment variable
+CMD ["python", "app.py"]
