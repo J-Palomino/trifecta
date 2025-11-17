@@ -90,9 +90,25 @@ class MeshCentralWebSocketManager:
                 if self.should_run:
                     logger.info("WebSocket disconnected, reconnecting in 5s...")
                     time.sleep(5)
+                    # Recreate WebSocket object for reconnection
+                    self.ws = websocket.WebSocketApp(
+                        self.ws_url,
+                        on_message=self._on_message,
+                        on_error=self._on_error,
+                        on_close=self._on_close,
+                        on_open=self._on_open
+                    )
             except Exception as e:
                 logger.error(f"WebSocket run error: {e}")
                 time.sleep(5)
+                # Recreate WebSocket object after error
+                self.ws = websocket.WebSocketApp(
+                    self.ws_url,
+                    on_message=self._on_message,
+                    on_error=self._on_error,
+                    on_close=self._on_close,
+                    on_open=self._on_open
+                )
 
     def _on_open(self, ws):
         """Handle WebSocket connection established"""
