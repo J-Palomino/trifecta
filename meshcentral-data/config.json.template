@@ -17,6 +17,7 @@
       "newAccounts": ${ALLOW_NEW_ACCOUNTS},
       "ipkvm": ${ENABLE_IPKVM},
       "certUrl": "https://${MESHCENTRAL_CERT_NAME}:${MESHCENTRAL_PORT}",
+      "userAllowedIP": "0.0.0.0/0",
       "PreconfiguredScripts": [
         {
           "name": "Install Goose AI (Linux)",
