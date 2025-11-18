@@ -273,8 +273,9 @@ async def lifespan(app: FastAPI):
 
     # Startup
     logger.info("=" * 60)
-    logger.info("MeshCentral Proxy API v1.0.0")
+    logger.info("MeshCentral Proxy API v1.0.1 - UPDATED DEPLOYMENT")
     logger.info(f"MeshCentral URL: {MESHCENTRAL_URL}")
+    logger.info(f"Using Username/Password Authentication")
     logger.info("=" * 60)
 
     # Initialize WebSocket manager
@@ -302,7 +303,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="MeshCentral Proxy API",
     description="Simple API for MeshCentral device control",
-    version="1.0.0",
+    version="1.0.1",
     lifespan=lifespan
 )
 
@@ -332,7 +333,7 @@ async def health():
         "status": "healthy" if (ws_manager and ws_manager.authenticated) else "degraded",
         "connected": ws_manager.connected if ws_manager else False,
         "authenticated": ws_manager.authenticated if ws_manager else False,
-        "version": "1.0.0"
+        "version": "1.0.1"
     }
 
 
