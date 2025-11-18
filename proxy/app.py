@@ -186,9 +186,9 @@ class MeshCentralWebSocketManager:
         if not self.connected or not self.authenticated:
             return None
 
-        # Add unique message ID
+        # Add unique message ID using MeshCentral's responseid system
         msg_id = str(uuid.uuid4())
-        data['tag'] = msg_id
+        data['responseid'] = msg_id
 
         # Create response queue
         response_queue = queue.Queue()
@@ -273,9 +273,10 @@ async def lifespan(app: FastAPI):
 
     # Startup
     logger.info("=" * 60)
-    logger.info("MeshCentral Proxy API v1.0.2 - EXTENDED TIMEOUTS")
+    logger.info("MeshCentral Proxy API v1.0.3 - FIXED MESSAGE ROUTING")
     logger.info(f"MeshCentral URL: {MESHCENTRAL_URL}")
     logger.info(f"Using Username/Password Authentication")
+    logger.info(f"Using responseid for message routing")
     logger.info(f"Command/Screenshot timeout: 150 seconds")
     logger.info("=" * 60)
 
@@ -304,7 +305,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="MeshCentral Proxy API",
     description="Simple API for MeshCentral device control",
-    version="1.0.2",
+    version="1.0.3",
     lifespan=lifespan
 )
 
@@ -334,7 +335,7 @@ async def health():
         "status": "healthy" if (ws_manager and ws_manager.authenticated) else "degraded",
         "connected": ws_manager.connected if ws_manager else False,
         "authenticated": ws_manager.authenticated if ws_manager else False,
-        "version": "1.0.2"
+        "version": "1.0.3"
     }
 
 
