@@ -1,11 +1,15 @@
+#!/usr/bin/env python3
 """
-DaisyChain HTTP Proxy Service
-Provides REST API access to MeshCentral WebSocket interface
+Simple MeshCentral Proxy API with 3 main routes:
+- /getDevices - Returns list of available devices
+- /getScreen - Returns screenshot of chosen device
+- /sendCommand - Sends command to chosen device
 """
 
-from fastapi import FastAPI, HTTPException, Depends, Header, BackgroundTasks
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Header
+from fastapi.responses import Response
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 import websocket
 import json
 import base64
@@ -13,314 +17,387 @@ import os
 import threading
 import queue
 import logging
-from typing import Optional, Dict
 import time
+import uuid
+from typing import Optional, Dict, List, Any
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(
-    title="DaisyChain Proxy API",
-    description="HTTP REST API for MeshCentral device control",
-    version="1.0.0"
-)
+# Configuration
+MESHCENTRAL_URL = os.getenv('DAISYCHAIN_URL', 'tee.up.railway.app')
+MESHCENTRAL_USERNAME = os.getenv('MESHCENTRAL_USERNAME')
+MESHCENTRAL_PASSWORD = os.getenv('MESHCENTRAL_PASSWORD')
+PROXY_API_KEY = os.getenv('PROXY_API_KEY')
 
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Global WebSocket manager
+ws_manager = None
 
-# Configuration from environment
-DAISYCHAIN_URL = os.getenv('DAISYCHAIN_URL', 'tee.up.railway.app')
-DAISYCHAIN_TOKEN = os.getenv('DAISYCHAIN_TOKEN')
-PROXY_API_KEY = os.getenv('PROXY_API_KEY', 'change-me-in-production')
-
-class MeshCentralConnection:
+class MeshCentralWebSocketManager:
     """Manages persistent WebSocket connection to MeshCentral"""
 
-    def __init__(self, url: str, token: str):
-        self.url = url
-        self.token = token
+    def __init__(self, url: str, username: str, password: str):
+        self.url = url if url.startswith('wss://') else f'wss://{url}/control.ashx'
+        self.username = username
+        self.password = password
         self.ws = None
         self.connected = False
-        self.response_queue = queue.Queue()
-        self.pending_requests: Dict[str, queue.Queue] = {}
-        self.lock = threading.Lock()
+        self.authenticated = False
+        self.response_queues: Dict[str, queue.Queue] = {}
+        self.devices = {}
+        self.listener_thread = None
+        self.should_run = True
+
+    def _create_auth_header(self):
+        """Create x-meshauth header with base64 encoded credentials"""
+        username_b64 = base64.b64encode(self.username.encode()).decode()
+        password_b64 = base64.b64encode(self.password.encode()).decode()
+        return f"{username_b64},{password_b64}"
 
     def connect(self):
-        """Establish WebSocket connection and authenticate"""
+        """Establish WebSocket connection"""
         try:
-            self.ws = websocket.create_connection(
-                f'wss://{self.url}/control.ashx',
-                timeout=10
+            logger.info(f"Connecting to MeshCentral WebSocket: {self.url}")
+
+            auth_header = self._create_auth_header()
+
+            self.ws = websocket.WebSocketApp(
+                self.url,
+                header=[f"x-meshauth: {auth_header}"],
+                on_message=self._on_message,
+                on_error=self._on_error,
+                on_close=self._on_close,
+                on_open=self._on_open
             )
 
-            # Authenticate
-            auth_msg = {
-                'action': 'authToken',
-                'token': self.token
-            }
-            self.ws.send(json.dumps(auth_msg))
+            # Start listener in background thread
+            self.listener_thread = threading.Thread(target=self._run_forever, daemon=True)
+            self.listener_thread.start()
 
-            # Wait for auth response
-            response = json.loads(self.ws.recv())
+            # Wait for connection
+            for _ in range(100):
+                if self.authenticated:
+                    return True
+                time.sleep(0.1)
 
-            if response.get('result') == 'ok':
-                self.connected = True
-                logger.info("Connected to MeshCentral successfully")
-
-                # Start listener thread
-                threading.Thread(target=self._listen, daemon=True).start()
-                return True
-            else:
-                logger.error(f"Authentication failed: {response}")
-                return False
+            return self.connected
 
         except Exception as e:
-            logger.error(f"Connection failed: {e}")
-            self.connected = False
+            logger.error(f"WebSocket connection error: {e}")
             return False
 
-    def _listen(self):
-        """Listen for responses from MeshCentral"""
-        while self.connected:
+    def _run_forever(self):
+        """Run WebSocket in background"""
+        while self.should_run:
             try:
-                msg = self.ws.recv()
-                data = json.loads(msg)
-
-                # Route response to appropriate queue
-                request_id = data.get('tag')
-                if request_id and request_id in self.pending_requests:
-                    self.pending_requests[request_id].put(data)
-                else:
-                    # General response queue
-                    self.response_queue.put(data)
-
-            except websocket.WebSocketConnectionClosedException:
-                logger.warning("WebSocket connection closed")
-                self.connected = False
-                break
+                self.ws.run_forever()
+                if self.should_run:
+                    logger.info("WebSocket disconnected, reconnecting in 5s...")
+                    time.sleep(5)
+                    # Recreate WebSocket object for reconnection
+                    auth_header = self._create_auth_header()
+                    self.ws = websocket.WebSocketApp(
+                        self.url,
+                        header=[f"x-meshauth: {auth_header}"],
+                        on_message=self._on_message,
+                        on_error=self._on_error,
+                        on_close=self._on_close,
+                        on_open=self._on_open
+                    )
             except Exception as e:
-                logger.error(f"Error in listener: {e}")
-                break
+                logger.error(f"WebSocket run error: {e}")
+                time.sleep(5)
 
-    def send_command(self, device_id: str, command: str, timeout: int = 30) -> dict:
-        """Send shell command to device"""
-        if not self.connected:
-            raise Exception("Not connected to MeshCentral")
+    def _on_open(self, ws):
+        """Handle WebSocket connection established"""
+        logger.info("WebSocket connection established")
+        self.connected = True
+        # Request device list
+        ws.send(json.dumps({'action': 'nodes'}))
 
-        request_id = f"cmd_{int(time.time() * 1000)}"
-        response_queue = queue.Queue()
-
-        with self.lock:
-            self.pending_requests[request_id] = response_queue
-
+    def _on_message(self, ws, message):
+        """Handle incoming WebSocket messages"""
         try:
-            msg = {
-                'action': 'msg',
-                'nodeid': device_id,
-                'type': 'runcommands',
-                'cmds': command,
-                'tag': request_id
-            }
-            self.ws.send(json.dumps(msg))
+            data = json.loads(message)
+            action = data.get('action', 'unknown')
 
-            # Wait for response
-            response = response_queue.get(timeout=timeout)
-            return response
+            # Handle nodes list - means we're authenticated
+            if action == 'nodes':
+                if 'nodes' in data:
+                    self.devices = data['nodes']
+                    self.authenticated = True
+                    logger.info(f"Authenticated! Received {len(self.devices)} device groups")
 
-        except queue.Empty:
-            raise TimeoutError(f"No response from device after {timeout}s")
-        finally:
-            with self.lock:
-                self.pending_requests.pop(request_id, None)
+            # Handle authentication response
+            elif action == 'authcookie':
+                self.authenticated = True
+                logger.info("WebSocket authenticated successfully")
+                # Request device list
+                self._send({'action': 'nodes'})
 
-    def get_screenshot(self, device_id: str, timeout: int = 30) -> Optional[bytes]:
-        """Get screenshot from device"""
-        if not self.connected:
-            raise Exception("Not connected to MeshCentral")
+            # Handle close/error messages
+            elif action == 'close':
+                cause = data.get('cause', 'unknown')
+                logger.error(f"MeshCentral closed connection: {data}")
+                if cause == 'noauth':
+                    logger.error("Authentication failed - check credentials")
+                self.authenticated = False
 
-        request_id = f"screenshot_{int(time.time() * 1000)}"
-        response_queue = queue.Queue()
+            # Handle event updates (device status changes)
+            elif action == 'event':
+                event = data.get('event', {})
+                if event.get('action') in ['addnode', 'changenode']:
+                    # Refresh device list
+                    self._send({'action': 'nodes'})
 
-        with self.lock:
-            self.pending_requests[request_id] = response_queue
+            # Route responses to waiting queues
+            msg_id = data.get('responseid') or data.get('tag')
+            if msg_id and msg_id in self.response_queues:
+                self.response_queues[msg_id].put(data)
 
+        except json.JSONDecodeError:
+            logger.error(f"Invalid JSON message: {message}")
+        except Exception as e:
+            logger.error(f"Message handling error: {e}")
+
+    def _on_error(self, ws, error):
+        """Handle WebSocket errors"""
+        logger.error(f"WebSocket error: {error}")
+
+    def _on_close(self, ws, close_status_code, close_msg):
+        """Handle WebSocket connection closed"""
+        logger.info(f"WebSocket closed: {close_status_code} - {close_msg}")
+        self.connected = False
+        self.authenticated = False
+
+    def _send(self, data: Dict) -> bool:
+        """Send message via WebSocket"""
         try:
-            msg = {
-                'action': 'msg',
-                'nodeid': device_id,
-                'type': 'screenshot',
-                'tag': request_id
-            }
-            self.ws.send(json.dumps(msg))
+            if self.ws and self.connected:
+                self.ws.send(json.dumps(data))
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Send error: {e}")
+            return False
 
-            response = response_queue.get(timeout=timeout)
-
-            if 'data' in response:
-                return base64.b64decode(response['data'])
+    def send_and_wait(self, data: Dict, timeout: int = 10) -> Optional[Dict]:
+        """Send message and wait for response"""
+        if not self.connected or not self.authenticated:
             return None
 
-        except queue.Empty:
-            raise TimeoutError(f"No response from device after {timeout}s")
-        finally:
-            with self.lock:
-                self.pending_requests.pop(request_id, None)
+        # Add unique message ID using MeshCentral's responseid system
+        msg_id = str(uuid.uuid4())
+        data['responseid'] = msg_id
 
-    def list_devices(self, timeout: int = 10) -> dict:
-        """Get list of all devices"""
-        if not self.connected:
-            raise Exception("Not connected to MeshCentral")
+        # Create response queue
+        response_queue = queue.Queue()
+        self.response_queues[msg_id] = response_queue
 
-        msg = {'action': 'nodes'}
-        self.ws.send(json.dumps(msg))
+        # Send message
+        if not self._send(data):
+            del self.response_queues[msg_id]
+            return None
 
+        # Wait for response
         try:
-            response = self.response_queue.get(timeout=timeout)
+            response = response_queue.get(timeout=timeout)
+            del self.response_queues[msg_id]
             return response
         except queue.Empty:
-            raise TimeoutError("No response from server")
+            del self.response_queues[msg_id]
+            return None
 
-# Global connection instance
-meshcentral = MeshCentralConnection(DAISYCHAIN_URL, DAISYCHAIN_TOKEN)
+    def get_devices_list(self) -> List[Dict]:
+        """Get list of all devices in simple format"""
+        devices_list = []
 
-@app.on_event("startup")
-async def startup():
-    """Connect to MeshCentral on startup"""
-    logger.info("Starting DaisyChain Proxy...")
+        for mesh_id, devices_in_mesh in self.devices.items():
+            if isinstance(devices_in_mesh, list):
+                for device in devices_in_mesh:
+                    node_id = device.get('_id', '')
+                    name = device.get('name', 'Unknown')
+                    conn = device.get('conn', 0)
+                    online = (conn & 1) != 0
+                    os_desc = device.get('osdesc', 'Unknown OS')
+                    ip = device.get('ip', 'N/A')
 
-    if not DAISYCHAIN_TOKEN:
-        logger.error("DAISYCHAIN_TOKEN not set!")
-        return
+                    devices_list.append({
+                        'id': node_id,
+                        'name': name,
+                        'online': online,
+                        'os': os_desc,
+                        'ip': ip
+                    })
 
-    success = meshcentral.connect()
-    if not success:
-        logger.error("Failed to connect to MeshCentral")
+        return devices_list
 
-# API Key authentication
-def verify_api_key(x_api_key: str = Header(...)):
+    def execute_command(self, node_id: str, command: str) -> Optional[Dict]:
+        """Execute shell command on device"""
+        msg = {
+            'action': 'runcommands',
+            'nodeids': [node_id],
+            'type': 0,  # 0=shell, 1=cmd, 2=powershell
+            'cmds': command,
+            'runAsUser': 1
+        }
+        return self.send_and_wait(msg, timeout=150)
+
+    def get_screenshot(self, node_id: str) -> Optional[bytes]:
+        """Request screenshot from device"""
+        msg = {
+            'action': 'msg',
+            'nodeid': node_id,
+            'type': 'screenshot'
+        }
+        response = self.send_and_wait(msg, timeout=150)
+
+        if response and 'data' in response:
+            try:
+                return base64.b64decode(response['data'])
+            except Exception as e:
+                logger.error(f"Screenshot decode error: {e}")
+        return None
+
+    def disconnect(self):
+        """Close WebSocket connection"""
+        self.should_run = False
+        if self.ws:
+            self.ws.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup and shutdown"""
+    global ws_manager
+
+    # Startup
+    logger.info("=" * 60)
+    logger.info("MeshCentral Proxy API v1.0.3 - FIXED MESSAGE ROUTING")
+    logger.info(f"MeshCentral URL: {MESHCENTRAL_URL}")
+    logger.info(f"Using Username/Password Authentication")
+    logger.info(f"Using responseid for message routing")
+    logger.info(f"Command/Screenshot timeout: 150 seconds")
+    logger.info("=" * 60)
+
+    # Initialize WebSocket manager
+    WS_URL = f'wss://{MESHCENTRAL_URL}/control.ashx' if not MESHCENTRAL_URL.startswith('wss://') else MESHCENTRAL_URL
+    ws_manager = MeshCentralWebSocketManager(WS_URL, MESHCENTRAL_USERNAME, MESHCENTRAL_PASSWORD)
+
+    # Connect in background
+    threading.Thread(target=ws_manager.connect, daemon=True).start()
+
+    # Wait for connection
+    time.sleep(3)
+
+    if ws_manager.connected and ws_manager.authenticated:
+        logger.info("Successfully connected to MeshCentral")
+    else:
+        logger.error("Failed to connect to MeshCentral - check credentials")
+
+    yield
+
+    # Shutdown
+    if ws_manager:
+        ws_manager.disconnect()
+
+
+app = FastAPI(
+    title="MeshCentral Proxy API",
+    description="Simple API for MeshCentral device control",
+    version="1.0.3",
+    lifespan=lifespan
+)
+
+
+# Request/Response models
+class CommandRequest(BaseModel):
+    device_id: str
+    command: str
+
+class ScreenshotRequest(BaseModel):
+    device_id: str
+
+
+def verify_api_key(x_api_key: str = Header(None)):
     """Verify API key from header"""
     if x_api_key != PROXY_API_KEY:
         raise HTTPException(status_code=403, detail="Invalid API key")
     return x_api_key
 
-# Request/Response Models
-class CommandRequest(BaseModel):
-    device_id: str
-    command: str
-    timeout: int = 30
-
-class ScreenshotRequest(BaseModel):
-    device_id: str
-    timeout: int = 30
 
 # API Endpoints
-@app.get("/")
-async def root():
-    """Health check endpoint"""
-    return {
-        "service": "DaisyChain Proxy API",
-        "status": "running",
-        "connected": meshcentral.connected,
-        "version": "1.0.0"
-    }
 
 @app.get("/health")
 async def health():
-    """Detailed health check"""
+    """Health check endpoint"""
     return {
-        "status": "healthy" if meshcentral.connected else "unhealthy",
-        "meshcentral_connected": meshcentral.connected,
-        "meshcentral_url": DAISYCHAIN_URL
+        "status": "healthy" if (ws_manager and ws_manager.authenticated) else "degraded",
+        "connected": ws_manager.connected if ws_manager else False,
+        "authenticated": ws_manager.authenticated if ws_manager else False,
+        "version": "1.0.3"
     }
 
-@app.post("/api/command")
-async def send_command(
-    req: CommandRequest,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Send shell command to device
 
-    Returns command output and execution result
-    """
-    try:
-        result = meshcentral.send_command(
-            req.device_id,
-            req.command,
-            req.timeout
-        )
-        return {
-            "success": True,
-            "device_id": req.device_id,
-            "command": req.command,
-            "result": result
-        }
-    except TimeoutError as e:
-        raise HTTPException(status_code=504, detail=str(e))
-    except Exception as e:
-        logger.error(f"Command execution failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+@app.get("/getDevices")
+async def get_devices(x_api_key: str = Header(None)):
+    """Get list of all available devices"""
+    verify_api_key(x_api_key)
 
-@app.post("/api/screenshot")
-async def get_screenshot(
-    req: ScreenshotRequest,
-    api_key: str = Depends(verify_api_key)
-):
-    """
-    Get screenshot from device
+    if ws_manager is None or not ws_manager.authenticated:
+        raise HTTPException(status_code=503, detail="Not connected to MeshCentral")
 
-    Returns base64-encoded PNG image
-    """
-    try:
-        screenshot = meshcentral.get_screenshot(req.device_id, req.timeout)
+    devices = ws_manager.get_devices_list()
 
-        if screenshot:
-            return {
-                "success": True,
-                "device_id": req.device_id,
-                "screenshot": base64.b64encode(screenshot).decode(),
-                "format": "png"
-            }
-        else:
-            raise HTTPException(status_code=404, detail="No screenshot received")
-
-    except TimeoutError as e:
-        raise HTTPException(status_code=504, detail=str(e))
-    except Exception as e:
-        logger.error(f"Screenshot failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/devices")
-async def list_devices(api_key: str = Depends(verify_api_key)):
-    """
-    List all connected devices
-
-    Returns list of devices with their IDs and status
-    """
-    try:
-        devices = meshcentral.list_devices()
-        return {
-            "success": True,
-            "devices": devices
-        }
-    except Exception as e:
-        logger.error(f"Failed to list devices: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/api/info")
-async def get_info(api_key: str = Depends(verify_api_key)):
-    """Get proxy configuration info"""
     return {
-        "daisychain_url": DAISYCHAIN_URL,
-        "connected": meshcentral.connected,
-        "api_version": "1.0.0"
+        "success": True,
+        "count": len(devices),
+        "devices": devices
     }
+
+
+@app.post("/sendCommand")
+async def send_command(request: CommandRequest, x_api_key: str = Header(None)):
+    """Send command to a device"""
+    verify_api_key(x_api_key)
+
+    if ws_manager is None or not ws_manager.authenticated:
+        raise HTTPException(status_code=503, detail="Not connected to MeshCentral")
+
+    result = ws_manager.execute_command(request.device_id, request.command)
+
+    if result:
+        return {
+            "success": True,
+            "device_id": request.device_id,
+            "command": request.command,
+            "output": result.get('result', result.get('value', '')),
+            "raw_response": result
+        }
+    else:
+        return {
+            "success": False,
+            "error": "Command timeout or failed"
+        }
+
+
+@app.post("/getScreen")
+async def get_screen(request: ScreenshotRequest, x_api_key: str = Header(None)):
+    """Get screenshot from a device"""
+    verify_api_key(x_api_key)
+
+    if ws_manager is None or not ws_manager.authenticated:
+        raise HTTPException(status_code=503, detail="Not connected to MeshCentral")
+
+    screenshot_data = ws_manager.get_screenshot(request.device_id)
+
+    if screenshot_data:
+        return Response(content=screenshot_data, media_type="image/png")
+    else:
+        raise HTTPException(status_code=500, detail="Screenshot capture failed")
+
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)

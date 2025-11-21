@@ -9,7 +9,9 @@
   "dependencies": {
     "acme-client": "4.2.5",
     "meshcentral": "^1.1.42",
-    "otplib": "10.2.3"
+    "mongodb": "4.13.0",
+    "otplib": "10.2.3",
+    "saslprep": "1.0.3"
   },
   "optionalDependencies": {
     "loadavg-windows": "1.1.1",

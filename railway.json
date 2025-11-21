@@ -2,25 +2,11 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "DOCKERFILE",
-    "dockerfilePath": "./Dockerfile"
+    "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "healthcheckTimeout": 800,
+    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 10,
-    "volumeMounts": [
-      {
-        "mountPath": "/app/meshcentral-data",
-        "volumeName": "meshcentral-data"
-      },
-      {
-        "mountPath": "/app/meshcentral-backups",
-        "volumeName": "meshcentral-backups"
-      },
-      {
-        "mountPath": "/app/meshcentral-files",
-        "volumeName": "meshcentral-files"
-      }
-    ]
+    "restartPolicyMaxRetries": 10
   }
-} 
+}
