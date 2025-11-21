@@ -305,7 +305,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="MeshCentral Proxy API",
     description="Simple API for MeshCentral device control",
-    version="1.0.4",
+    version="1.0.5",
     lifespan=lifespan
 )
 
@@ -335,7 +335,7 @@ async def health():
         "status": "healthy" if (ws_manager and ws_manager.authenticated) else "degraded",
         "connected": ws_manager.connected if ws_manager else False,
         "authenticated": ws_manager.authenticated if ws_manager else False,
-        "version": "1.0.4"
+        "version": "1.0.5"
     }
 
 
@@ -395,6 +395,46 @@ async def get_screen(request: ScreenshotRequest, x_api_key: str = Header(None)):
         return Response(content=screenshot_data, media_type="image/png")
     else:
         raise HTTPException(status_code=500, detail="Screenshot capture failed")
+
+
+class SaveJsonRequest(BaseModel):
+    device_id: str
+    path: str  # Directory path on remote device
+    data: Dict[str, Any]  # JSON data to save
+
+
+@app.post("/saveJson")
+async def save_json(request: SaveJsonRequest, x_api_key: str = Header(None)):
+    """Save JSON data as a timestamped file on a device"""
+    verify_api_key(x_api_key)
+
+    if ws_manager is None or not ws_manager.authenticated:
+        raise HTTPException(status_code=503, detail="Not connected to MeshCentral")
+
+    from datetime import datetime
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"data_{timestamp}.json"
+    filepath = f"{request.path.rstrip('/')}/{filename}"
+
+    # Escape JSON for shell command
+    json_str = json.dumps(request.data).replace("'", "'\\''")
+    command = f"mkdir -p {request.path} && echo '{json_str}' > {filepath}"
+
+    result = ws_manager.execute_command(request.device_id, command)
+
+    if result:
+        return {
+            "success": True,
+            "device_id": request.device_id,
+            "filepath": filepath,
+            "filename": filename,
+            "timestamp": timestamp
+        }
+    else:
+        return {
+            "success": False,
+            "error": "Failed to save JSON file"
+        }
 
 
 if __name__ == "__main__":
