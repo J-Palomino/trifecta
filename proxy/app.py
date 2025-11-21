@@ -239,7 +239,7 @@ class MeshCentralWebSocketManager:
             'nodeids': [node_id],
             'type': 0,  # 0=shell, 1=cmd, 2=powershell
             'cmds': command,
-            'runAsUser': 1
+            'runAsUser': 0  # 0=run as root/agent, 1=run as logged-in user
         }
         return self.send_and_wait(msg, timeout=150)
 
@@ -305,7 +305,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="MeshCentral Proxy API",
     description="Simple API for MeshCentral device control",
-    version="1.0.3",
+    version="1.0.4",
     lifespan=lifespan
 )
 
@@ -335,7 +335,7 @@ async def health():
         "status": "healthy" if (ws_manager and ws_manager.authenticated) else "degraded",
         "connected": ws_manager.connected if ws_manager else False,
         "authenticated": ws_manager.authenticated if ws_manager else False,
-        "version": "1.0.3"
+        "version": "1.0.4"
     }
 
 
