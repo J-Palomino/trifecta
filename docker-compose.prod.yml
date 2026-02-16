@@ -9,7 +9,6 @@ services:
       - ./package.json:/app/package.json:ro
       - ./package-lock.json:/app/package-lock.json:ro
       - ./index.js:/app/index.js:ro
-      - ./nginx.conf:/app/nginx.conf:ro
       - ./meshcentral-data:/app/meshcentral-data
       # Exclude: .env, .git, certificates, documentation, etc.
     
