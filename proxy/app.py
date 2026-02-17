@@ -19,6 +19,8 @@ import queue
 import logging
 import time
 import uuid
+import re
+import shlex
 from typing import Optional, Dict, List, Any
 
 logging.basicConfig(level=logging.INFO)
@@ -43,6 +45,7 @@ class MeshCentralWebSocketManager:
         self.ws = None
         self.connected = False
         self.authenticated = False
+        self._lock = threading.Lock()
         self.response_queues: Dict[str, queue.Queue] = {}
         self.devices = {}
         self.listener_thread = None
@@ -96,14 +99,15 @@ class MeshCentralWebSocketManager:
                     time.sleep(5)
                     # Recreate WebSocket object for reconnection
                     auth_header = self._create_auth_header()
-                    self.ws = websocket.WebSocketApp(
-                        self.url,
-                        header=[f"x-meshauth: {auth_header}"],
-                        on_message=self._on_message,
-                        on_error=self._on_error,
-                        on_close=self._on_close,
-                        on_open=self._on_open
-                    )
+                    with self._lock:
+                        self.ws = websocket.WebSocketApp(
+                            self.url,
+                            header=[f"x-meshauth: {auth_header}"],
+                            on_message=self._on_message,
+                            on_error=self._on_error,
+                            on_close=self._on_close,
+                            on_open=self._on_open
+                        )
             except Exception as e:
                 logger.error(f"WebSocket run error: {e}")
                 time.sleep(5)
@@ -173,9 +177,10 @@ class MeshCentralWebSocketManager:
     def _send(self, data: Dict) -> bool:
         """Send message via WebSocket"""
         try:
-            if self.ws and self.connected:
-                self.ws.send(json.dumps(data))
-                return True
+            with self._lock:
+                if self.ws and self.connected:
+                    self.ws.send(json.dumps(data))
+                    return True
             return False
         except Exception as e:
             logger.error(f"Send error: {e}")
@@ -196,17 +201,16 @@ class MeshCentralWebSocketManager:
 
         # Send message
         if not self._send(data):
-            del self.response_queues[msg_id]
+            self.response_queues.pop(msg_id, None)
             return None
 
         # Wait for response
         try:
-            response = response_queue.get(timeout=timeout)
-            del self.response_queues[msg_id]
-            return response
+            return response_queue.get(timeout=timeout)
         except queue.Empty:
-            del self.response_queues[msg_id]
             return None
+        finally:
+            self.response_queues.pop(msg_id, None)
 
     def get_devices_list(self) -> List[Dict]:
         """Get list of all devices in simple format"""
@@ -262,8 +266,9 @@ class MeshCentralWebSocketManager:
     def disconnect(self):
         """Close WebSocket connection"""
         self.should_run = False
-        if self.ws:
-            self.ws.close()
+        with self._lock:
+            if self.ws:
+                self.ws.close()
 
 
 @asynccontextmanager
@@ -273,12 +278,21 @@ async def lifespan(app: FastAPI):
 
     # Startup
     logger.info("=" * 60)
-    logger.info("MeshCentral Proxy API v1.0.3 - FIXED MESSAGE ROUTING")
+    logger.info("MeshCentral Proxy API v1.0.6")
     logger.info(f"MeshCentral URL: {MESHCENTRAL_URL}")
-    logger.info(f"Using Username/Password Authentication")
-    logger.info(f"Using responseid for message routing")
-    logger.info(f"Command/Screenshot timeout: 150 seconds")
     logger.info("=" * 60)
+
+    # Validate required env vars
+    missing = []
+    if not MESHCENTRAL_USERNAME:
+        missing.append("MESHCENTRAL_USERNAME")
+    if not MESHCENTRAL_PASSWORD:
+        missing.append("MESHCENTRAL_PASSWORD")
+    if not PROXY_API_KEY:
+        missing.append("PROXY_API_KEY")
+    if missing:
+        logger.error(f"Missing required environment variables: {', '.join(missing)}")
+        raise RuntimeError(f"Missing required environment variables: {', '.join(missing)}")
 
     # Initialize WebSocket manager
     WS_URL = f'wss://{MESHCENTRAL_URL}/control.ashx' if not MESHCENTRAL_URL.startswith('wss://') else MESHCENTRAL_URL
@@ -305,7 +319,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="MeshCentral Proxy API",
     description="Simple API for MeshCentral device control",
-    version="1.0.5",
+    version="1.0.6",
     lifespan=lifespan
 )
 
@@ -335,7 +349,7 @@ async def health():
         "status": "healthy" if (ws_manager and ws_manager.authenticated) else "degraded",
         "connected": ws_manager.connected if ws_manager else False,
         "authenticated": ws_manager.authenticated if ws_manager else False,
-        "version": "1.0.5"
+        "version": "1.0.6"
     }
 
 
@@ -411,14 +425,20 @@ async def save_json(request: SaveJsonRequest, x_api_key: str = Header(None)):
     if ws_manager is None or not ws_manager.authenticated:
         raise HTTPException(status_code=503, detail="Not connected to MeshCentral")
 
+    # Validate path: only allow safe directory characters, no traversal
+    if not re.match(r'^[a-zA-Z0-9/_.\-]+$', request.path) or '..' in request.path:
+        raise HTTPException(status_code=400, detail="Invalid path: only alphanumeric, /, _, -, . allowed")
+
     from datetime import datetime
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"data_{timestamp}.json"
+    safe_dir = shlex.quote(request.path.rstrip('/'))
     filepath = f"{request.path.rstrip('/')}/{filename}"
+    safe_filepath = shlex.quote(filepath)
 
-    # Escape JSON for shell command
-    json_str = json.dumps(request.data).replace("'", "'\\''")
-    command = f"mkdir -p {request.path} && echo '{json_str}' > {filepath}"
+    # Base64 encode JSON to avoid any shell interpretation
+    json_b64 = base64.b64encode(json.dumps(request.data).encode()).decode()
+    command = f"mkdir -p {safe_dir} && echo {shlex.quote(json_b64)} | base64 -d > {safe_filepath}"
 
     result = ws_manager.execute_command(request.device_id, command)
 
